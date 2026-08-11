@@ -16,7 +16,7 @@ test('should login with valid credentials', async ({ page }) => {
   await page.getByRole('button', {name: 'Login'}).click();
   await page.waitForURL(`${defaultUrl}/account`);
   
-  await page.getByRole('heading', {name: 'My account'}).isVisible();
+  await expect(page.getByRole('heading', {name: 'My account'})).toBeVisible();
 
   await page.getByRole('button', {name: 'Jane Doe'}).click();
   await page
@@ -25,11 +25,11 @@ test('should login with valid credentials', async ({ page }) => {
     .click();
 
   await page.waitForURL(`${defaultUrl}/auth/login`);
-  await page.getByRole('heading', {name: 'Login'});
+  await expect(page.getByRole('heading', {name: 'Login'})).toBeVisible();
 });
 
 test('should not login with invalid credentials', async ({ page }) => {
-   await page.goto(defaultUrl);
+  await page.goto(defaultUrl);
 
   await page.getByText('Sign In').click();
   await page.waitForURL(`${defaultUrl}/auth/login`);
@@ -38,10 +38,9 @@ test('should not login with invalid credentials', async ({ page }) => {
   await page.getByPlaceholder('Your password').fill('qwerty123');
   await page.getByRole('button', {name: 'Login'}).click();
 
-  await page
-    .getByRole('alert')
-    .filter({hasText: 'Invalid email or password'})
-    .isVisible();
-  
-  await page.waitForURL(`${defaultUrl}/auth/login`);
+  await expect(page
+    .getByText('Invalid email or password'))
+    .toBeVisible();
+
+  await expect(page).toHaveURL(`${defaultUrl}/auth/login`);
 });
