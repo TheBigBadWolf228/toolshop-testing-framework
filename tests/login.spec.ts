@@ -28,4 +28,20 @@ test('should login with valid credentials', async ({ page }) => {
   await page.getByRole('heading', {name: 'Login'});
 });
 
+test('should not login with invalid credentials', async ({ page }) => {
+   await page.goto(defaultUrl);
 
+  await page.getByText('Sign In').click();
+  await page.waitForURL(`${defaultUrl}/auth/login`);
+
+  await page.getByPlaceholder('Your email').fill('invalid@example.com');
+  await page.getByPlaceholder('Your password').fill('qwerty123');
+  await page.getByRole('button', {name: 'Login'}).click();
+
+  await page
+    .getByRole('alert')
+    .filter({hasText: 'Invalid email or password'})
+    .isVisible();
+  
+  await page.waitForURL(`${defaultUrl}/auth/login`);
+});
