@@ -36,21 +36,21 @@ test('power tools should filter', async ({ page }) => {
     .filter({hasText: 'Power Tools'})
     .click();
 
-    await page.waitForURL(`category/power-tools`);
+    await page.waitForURL(`/category/power-tools`);
 
-    const firstElementBeforeSorting = await page
+    const firstElementBeforeFiltering = await page
         .getByTestId('product-name')
         .first()
         .innerText();
     
 
     await page.getByRole('checkbox', {name: 'Drill'}).check();
-    await page.getByRole('checkbox', {name: ' MightyCraft Hardware'}).check();
+    await page.getByRole('checkbox', {name: 'MightyCraft Hardware'}).check();
 
     await expect(page
         .getByTestId('product-name')
         .first())
-        .not.toHaveText(firstElementBeforeSorting);  
+        .not.toHaveText(firstElementBeforeFiltering);  
 });
 
 

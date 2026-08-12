@@ -4,7 +4,7 @@ test('should apply price filter', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByTestId('product-name')).toHaveCount(9);
 
-    const firstElementBeforeSorting = await page
+    const firstElementBeforeFiltering = await page
         .getByTestId('product-name')
         .first()
         .innerText();
@@ -24,7 +24,7 @@ test('should apply price filter', async ({ page }) => {
     await expect(page
         .getByTestId('product-name')
         .first())
-        .not.toHaveText(firstElementBeforeSorting);
+        .not.toHaveText(firstElementBeforeFiltering);
 });
     
 
