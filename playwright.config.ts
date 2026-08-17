@@ -48,6 +48,10 @@ export default defineConfig({
       name: 'API',
       use: {
         baseURL: 'https://api.practicesoftwaretesting.com',
+        extraHTTPHeaders: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
       },
       testDir: './tests/api',
     },
