@@ -5,10 +5,16 @@ import {
 } from '@playwright/test';
 import { readToken } from '../../support/auth.js';
 import type { Role } from '../../support/users.js';
+import { BrandsClient } from '../clients/brands.client.js';
+
+interface Api {
+  brands: BrandsClient;
+}
 
 interface ApiFixtures {
   customerRequest: APIRequestContext;
   adminRequest: APIRequestContext;
+  api: Api;
 }
 
 interface ApiOptions {
@@ -46,6 +52,11 @@ export const test = base.extend<ApiFixtures>({
     );
     await use(context);
     await context.dispose();
+  },
+  api: async ({ adminRequest }, use) => {
+    const api: Api = { brands: new BrandsClient(adminRequest) };
+    await use(api);
+    await api.brands.deleteCreated();
   },
 });
 
