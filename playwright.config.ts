@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import {
   defineConfig,
   devices,
@@ -8,6 +9,10 @@ const sharedUiUse: Partial<PlaywrightTestOptions> = {
   baseURL: 'https://practicesoftwaretesting.com',
   testIdAttribute: 'data-test',
 };
+
+if (existsSync('.env')) {
+  process.loadEnvFile('.env');
+}
 
 export default defineConfig({
   fullyParallel: true,
@@ -21,12 +26,25 @@ export default defineConfig({
 
   projects: [
     {
+      name: 'setup',
+      testDir: './tests/setup',
+      testMatch: /.*\.setup\.ts/,
+      use: {
+        baseURL: 'https://api.practicesoftwaretesting.com',
+        extraHTTPHeaders: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      },
+    },
+    {
       name: 'UI Chrome',
       use: {
         ...devices['Desktop Chrome'],
         ...sharedUiUse,
       },
       testDir: './tests/ui',
+      dependencies: ['setup'],
     },
     {
       name: 'UI Firefox',
@@ -35,6 +53,7 @@ export default defineConfig({
         ...sharedUiUse,
       },
       testDir: './tests/ui',
+      dependencies: ['setup'],
     },
     {
       name: 'UI Safari',
@@ -43,6 +62,7 @@ export default defineConfig({
         ...sharedUiUse,
       },
       testDir: './tests/ui',
+      dependencies: ['setup'],
     },
     {
       name: 'API',
@@ -54,6 +74,7 @@ export default defineConfig({
         },
       },
       testDir: './tests/api',
+      dependencies: ['setup'],
     },
   ],
 });
