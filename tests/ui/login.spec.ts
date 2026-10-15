@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-const email = 'customer@practicesoftwaretesting.com';
-const password = 'welcome01';
+import { getCredentials } from '../support/users.js';
+
+const { email, password } = getCredentials('customer');
 
 test('should login with valid credentials', async ({ page }) => {
   await page.goto('/');

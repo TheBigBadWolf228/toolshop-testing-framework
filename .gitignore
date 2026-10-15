@@ -6,3 +6,13 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Output documentation with tasks
+/documentation/
+
+# Claude
+CLAUDE.MD
+.claude/
+
+# Local credentials
+.env
