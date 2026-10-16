@@ -6,8 +6,10 @@ import {
 import {
   CategoryListSchema,
   CategorySchema,
+  CreatedCategorySchema,
   type Category,
   type CategoryRequest,
+  type CreatedCategory,
 } from '../schemas/category.schema.js';
 import { SuccessSchema } from '../schemas/responses.schema.js';
 import type { Cleanup } from '../support/cleanup.js';
@@ -53,10 +55,10 @@ export class CategoriesClient {
     return response;
   }
 
-  async create(data: CategoryRequest): Promise<Category> {
+  async create(data: CategoryRequest): Promise<CreatedCategory> {
     const response = await this.createRaw(data);
     await expectStatus(response, 201, `POST ${CATEGORIES}`);
-    return CategorySchema.parse(await response.json());
+    return CreatedCategorySchema.parse(await response.json());
   }
 
   updateRaw(id: string, data: Partial<CategoryRequest>): Promise<APIResponse> {

@@ -16,7 +16,12 @@ export const CategorySchema = z.object({
   },
 });
 
+export const CreatedCategorySchema = CategorySchema.extend({
+  parent_id: z.string().nullable().optional(),
+});
+
 export const CategoryListSchema = z.array(CategorySchema);
 
 export type CategoryRequest = z.infer<typeof CategoryRequestSchema>;
 export type Category = z.infer<typeof CategorySchema>;
+export type CreatedCategory = z.infer<typeof CreatedCategorySchema>;
