@@ -1,8 +1,4 @@
-import {
-  expect,
-  type APIRequestContext,
-  type APIResponse,
-} from '@playwright/test';
+import type { APIRequestContext, APIResponse } from '@playwright/test';
 import {
   CreatedProductSchema,
   ProductPageSchema,
@@ -56,7 +52,7 @@ export class ProductsClient {
     const response = await this.request.post(PRODUCTS, { data });
     if (response.status() === 201) {
       const { id } = CreatedIdSchema.parse(await response.json());
-      this.cleanup.add(() => this.deleteIfExists(id));
+      this.cleanup.addDelete(`product ${id}`, () => this.deleteRaw(id));
     }
     return response;
   }
@@ -97,13 +93,5 @@ export class ProductsClient {
       204,
       `DELETE ${PRODUCTS}/${id}`
     );
-  }
-
-  private async deleteIfExists(id: string): Promise<void> {
-    const response = await this.deleteRaw(id);
-    expect(
-      [204, 404],
-      `cleanup of product ${id}: ${response.status()} ${await response.text()}`
-    ).toContain(response.status());
   }
 }

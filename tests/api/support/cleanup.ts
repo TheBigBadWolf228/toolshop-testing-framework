@@ -1,3 +1,5 @@
+import { expect, type APIResponse } from '@playwright/test';
+
 type CleanupAction = () => Promise<void>;
 
 export class Cleanup {
@@ -5,6 +7,16 @@ export class Cleanup {
 
   add(action: CleanupAction): void {
     this.actions.push(action);
+  }
+
+  addDelete(label: string, del: () => Promise<APIResponse>): void {
+    this.add(async () => {
+      const response = await del();
+      expect(
+        [204, 404],
+        `cleanup of ${label}: ${response.status()} ${await response.text()}`
+      ).toContain(response.status());
+    });
   }
 
   async run(): Promise<void> {

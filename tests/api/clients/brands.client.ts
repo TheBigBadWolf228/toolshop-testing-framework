@@ -1,8 +1,4 @@
-import {
-  expect,
-  type APIRequestContext,
-  type APIResponse,
-} from '@playwright/test';
+import type { APIRequestContext, APIResponse } from '@playwright/test';
 import {
   BrandListSchema,
   BrandSchema,
@@ -45,7 +41,7 @@ export class BrandsClient {
     const response = await this.request.post(BRANDS, { data });
     if (response.status() === 201) {
       const { id } = BrandSchema.parse(await response.json());
-      this.cleanup.add(() => this.deleteIfExists(id));
+      this.cleanup.addDelete(`brand ${id}`, () => this.deleteRaw(id));
     }
     return response;
   }
@@ -82,13 +78,5 @@ export class BrandsClient {
 
   async delete(id: string): Promise<void> {
     await expectStatus(await this.deleteRaw(id), 204, `DELETE ${BRANDS}/${id}`);
-  }
-
-  private async deleteIfExists(id: string): Promise<void> {
-    const response = await this.deleteRaw(id);
-    expect(
-      [204, 404],
-      `cleanup of brand ${id}: ${response.status()} ${await response.text()}`
-    ).toContain(response.status());
   }
 }
