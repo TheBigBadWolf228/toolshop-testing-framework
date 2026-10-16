@@ -1,8 +1,4 @@
-import {
-  expect,
-  type APIRequestContext,
-  type APIResponse,
-} from '@playwright/test';
+import type { APIRequestContext, APIResponse } from '@playwright/test';
 import {
   CategoryListSchema,
   CategorySchema,
@@ -50,7 +46,7 @@ export class CategoriesClient {
     const response = await this.request.post(CATEGORIES, { data });
     if (response.status() === 201) {
       const { id } = CreatedIdSchema.parse(await response.json());
-      this.cleanup.add(() => this.deleteIfExists(id));
+      this.cleanup.addDelete(`category ${id}`, () => this.deleteRaw(id));
     }
     return response;
   }
@@ -91,13 +87,5 @@ export class CategoriesClient {
       204,
       `DELETE ${CATEGORIES}/${id}`
     );
-  }
-
-  private async deleteIfExists(id: string): Promise<void> {
-    const response = await this.deleteRaw(id);
-    expect(
-      [204, 404],
-      `cleanup of category ${id}: ${response.status()} ${await response.text()}`
-    ).toContain(response.status());
   }
 }
