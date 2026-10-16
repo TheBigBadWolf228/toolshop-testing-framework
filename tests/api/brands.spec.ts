@@ -1,5 +1,4 @@
 import { test, expect } from './support/fixtures.js';
-import { BrandsClient } from './clients/brands.client.js';
 import { buildBrand } from './factories/brand.factory.js';
 import { ValidationErrorsSchema } from './schemas/brand.schema.js';
 
@@ -95,24 +94,22 @@ test.describe('brands rules', () => {
 
   test('should not delete the brand when no token is sent', async ({
     api,
-    request,
+    anonApi,
   }) => {
     const created = await api.brands.create(buildBrand());
 
-    const response = await new BrandsClient(request).deleteRaw(created.id);
+    const response = await anonApi.brands.deleteRaw(created.id);
 
     expect(response.status()).toBe(401);
   });
 
   test('should not delete the brand when the user is a customer', async ({
     api,
-    customerRequest,
+    customerApi,
   }) => {
     const created = await api.brands.create(buildBrand());
 
-    const response = await new BrandsClient(customerRequest).deleteRaw(
-      created.id
-    );
+    const response = await customerApi.brands.deleteRaw(created.id);
 
     expect(response.status()).toBe(403);
   });

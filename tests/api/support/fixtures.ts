@@ -5,16 +5,16 @@ import {
 } from '@playwright/test';
 import { readToken } from '../../support/auth.js';
 import type { Role } from '../../support/users.js';
-import { BrandsClient } from '../clients/brands.client.js';
-
-interface Api {
-  brands: BrandsClient;
-}
+import { createApi, type Api } from '../clients/api.js';
+import { Cleanup } from './cleanup.js';
 
 interface ApiFixtures {
+  cleanup: Cleanup;
   customerRequest: APIRequestContext;
   adminRequest: APIRequestContext;
   api: Api;
+  customerApi: Api;
+  anonApi: Api;
 }
 
 interface ApiOptions {
@@ -32,6 +32,16 @@ async function createAuthedContext(
     baseURL,
     extraHTTPHeaders: { ...headers, Authorization: `Bearer ${token}` },
   });
+}
+
+// Runs cleanup here because request contexts may be disposed in the fixture!
+async function provideApi(
+  request: APIRequestContext,
+  cleanup: Cleanup,
+  use: (api: Api) => Promise<void>
+): Promise<void> {
+  await use(createApi(request, cleanup));
+  await cleanup.run();
 }
 
 export const test = base.extend<ApiFixtures>({
@@ -53,10 +63,17 @@ export const test = base.extend<ApiFixtures>({
     await use(context);
     await context.dispose();
   },
-  api: async ({ adminRequest }, use) => {
-    const api: Api = { brands: new BrandsClient(adminRequest) };
-    await use(api);
-    await api.brands.deleteCreated();
+  cleanup: async ({}, use) => {
+    await use(new Cleanup());
+  },
+  api: async ({ adminRequest, cleanup }, use) => {
+    await provideApi(adminRequest, cleanup, use);
+  },
+  customerApi: async ({ customerRequest, cleanup }, use) => {
+    await provideApi(customerRequest, cleanup, use);
+  },
+  anonApi: async ({ request, cleanup }, use) => {
+    await provideApi(request, cleanup, use);
   },
 });
 
