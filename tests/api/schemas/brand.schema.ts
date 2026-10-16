@@ -11,10 +11,5 @@ export const BrandSchema = BrandRequestSchema.extend({
 
 export const BrandListSchema = z.array(BrandSchema);
 
-export const SuccessSchema = z.object({ success: z.boolean() });
-
-export const ValidationErrorsSchema = z.record(z.string(), z.array(z.string()));
-
 export type BrandRequest = z.infer<typeof BrandRequestSchema>;
 export type Brand = z.infer<typeof BrandSchema>;
-export type ValidationErrors = z.infer<typeof ValidationErrorsSchema>;
