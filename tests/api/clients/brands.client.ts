@@ -11,19 +11,9 @@ import {
   type BrandRequest,
 } from '../schemas/brand.schema.js';
 import type { Cleanup } from '../support/cleanup.js';
+import { expectStatus } from '../support/expect-status.js';
 
 const BRANDS = '/brands';
-
-async function expectStatus(
-  response: APIResponse,
-  status: number,
-  action: string
-): Promise<void> {
-  expect(
-    response.status(),
-    `${action} failed: ${response.status()} ${await response.text()}`
-  ).toBe(status);
-}
 
 export class BrandsClient {
   constructor(
