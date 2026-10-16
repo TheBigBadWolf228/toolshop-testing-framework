@@ -5,16 +5,14 @@ import {
 } from '@playwright/test';
 import { readToken } from '../../support/auth.js';
 import type { Role } from '../../support/users.js';
-import { BrandsClient } from '../clients/brands.client.js';
-
-interface Api {
-  brands: BrandsClient;
-}
+import { createApi, type Api } from '../clients/api.js';
 
 interface ApiFixtures {
   customerRequest: APIRequestContext;
   adminRequest: APIRequestContext;
   api: Api;
+  customerApi: Api;
+  anonApi: Api;
 }
 
 interface ApiOptions {
@@ -32,6 +30,15 @@ async function createAuthedContext(
     baseURL,
     extraHTTPHeaders: { ...headers, Authorization: `Bearer ${token}` },
   });
+}
+
+async function provideApi(
+  request: APIRequestContext,
+  use: (api: Api) => Promise<void>
+): Promise<void> {
+  const api = createApi(request);
+  await use(api);
+  await api.brands.deleteCreated();
 }
 
 export const test = base.extend<ApiFixtures>({
@@ -54,9 +61,13 @@ export const test = base.extend<ApiFixtures>({
     await context.dispose();
   },
   api: async ({ adminRequest }, use) => {
-    const api: Api = { brands: new BrandsClient(adminRequest) };
-    await use(api);
-    await api.brands.deleteCreated();
+    await provideApi(adminRequest, use);
+  },
+  customerApi: async ({ customerRequest }, use) => {
+    await provideApi(customerRequest, use);
+  },
+  anonApi: async ({ request }, use) => {
+    await provideApi(request, use);
   },
 });
 
