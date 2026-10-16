@@ -1,6 +1,6 @@
 import { test, expect } from './support/fixtures.js';
 import { buildBrand } from './factories/brand.factory.js';
-import { ValidationErrorsSchema } from './schemas/brand.schema.js';
+import { ValidationErrorsSchema } from './schemas/responses.schema.js';
 
 test.describe('brands CRUD', () => {
   test('should create a brand when valid data is sent', async ({ api }) => {

@@ -6,10 +6,10 @@ import {
 import {
   BrandListSchema,
   BrandSchema,
-  SuccessSchema,
   type Brand,
   type BrandRequest,
 } from '../schemas/brand.schema.js';
+import { SuccessSchema } from '../schemas/responses.schema.js';
 import type { Cleanup } from '../support/cleanup.js';
 import { expectStatus } from '../support/expect-status.js';
 
