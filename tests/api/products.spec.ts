@@ -184,6 +184,25 @@ test.describe('products access control', () => {
     expect((await api.products.getRaw(created.id)).status()).toBe(200);
   });
 
+  test('should not delete the product when the token is invalid', async ({
+    api,
+    invalidTokenApi,
+  }) => {
+    const deps = await createDeps(api);
+    const created = await api.products.create(buildProduct(refsOf(deps)));
+
+    const response = await invalidTokenApi.products.deleteRaw(created.id);
+
+    expect(response.status()).toBe(401);
+    const body = expectSchema(
+      MessageSchema,
+      await response.json(),
+      'DELETE /products 401'
+    );
+    expect(body.message).toBe('Unauthorized');
+    expect((await api.products.getRaw(created.id)).status()).toBe(200);
+  });
+
   test('should not delete the product when the user is a customer', async ({
     api,
     customerApi,
