@@ -4,8 +4,9 @@ import {
   type PlaywrightWorkerArgs,
 } from '@playwright/test';
 import { readToken } from '../../support/auth.js';
-import type { Role } from '../../support/users.js';
+import type { ApiCaller, ApiRole } from '../../support/users.js';
 import { createApi, type Api } from '../clients/api.js';
+import { INVALID_TOKEN } from '../data/access.js';
 import { Cleanup } from './cleanup.js';
 
 interface ApiFixtures {
@@ -17,11 +18,8 @@ interface ApiFixtures {
   customerApi: Api;
   anonApi: Api;
   invalidTokenApi: Api;
+  apiAs: (caller: ApiCaller) => Api;
 }
-
-type ApiRole = Role | 'invalidToken';
-
-const INVALID_TOKEN = 'not.a.jwt';
 
 interface ApiOptions {
   baseURL: string | undefined;
@@ -87,6 +85,15 @@ export const test = base.extend<ApiFixtures>({
   },
   invalidTokenApi: async ({ invalidTokenRequest, cleanup }, use) => {
     await use(createApi(invalidTokenRequest, cleanup));
+  },
+  apiAs: async ({ api, customerApi, anonApi, invalidTokenApi }, use) => {
+    const apis: Record<ApiCaller, Api> = {
+      admin: api,
+      customer: customerApi,
+      anon: anonApi,
+      invalidToken: invalidTokenApi,
+    };
+    await use((caller) => apis[caller]);
   },
 });
 

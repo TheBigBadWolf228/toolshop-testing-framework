@@ -1,4 +1,4 @@
-import type { ApiCaller } from '../support/fixtures.js';
+import type { ApiCaller } from '../../support/users.js';
 
 export interface Denial {
   status: number;
