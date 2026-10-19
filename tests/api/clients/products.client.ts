@@ -8,13 +8,11 @@ import {
   type ProductPage,
   type ProductRequest,
 } from '../schemas/product.schema.js';
-import { SuccessSchema } from '../schemas/responses.schema.js';
+import { IdSchema, SuccessSchema } from '../schemas/responses.schema.js';
 import type { Cleanup } from '../support/cleanup.js';
 import { expectStatus } from '../support/expect-status.js';
 
 const PRODUCTS = '/products';
-
-const CreatedIdSchema = CreatedProductSchema.pick({ id: true });
 
 export interface ProductListParams {
   page?: number;
@@ -51,7 +49,7 @@ export class ProductsClient {
   async createRaw(data: Partial<ProductRequest>): Promise<APIResponse> {
     const response = await this.request.post(PRODUCTS, { data });
     if (response.status() === 201) {
-      const { id } = CreatedIdSchema.parse(await response.json());
+      const { id } = IdSchema.parse(await response.json());
       this.cleanup.addDelete(`product ${id}`, () => this.deleteRaw(id));
     }
     return response;

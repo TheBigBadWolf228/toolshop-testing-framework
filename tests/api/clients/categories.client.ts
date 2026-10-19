@@ -7,14 +7,12 @@ import {
   type CategoryRequest,
   type CreatedCategory,
 } from '../schemas/category.schema.js';
-import { SuccessSchema } from '../schemas/responses.schema.js';
+import { IdSchema, SuccessSchema } from '../schemas/responses.schema.js';
 import type { Cleanup } from '../support/cleanup.js';
 import { expectStatus } from '../support/expect-status.js';
 
 const CATEGORIES = '/categories';
 const CATEGORY_TREE = '/categories/tree';
-
-const CreatedIdSchema = CategorySchema.pick({ id: true });
 
 export class CategoriesClient {
   constructor(
@@ -45,7 +43,7 @@ export class CategoriesClient {
   async createRaw(data: Partial<CategoryRequest>): Promise<APIResponse> {
     const response = await this.request.post(CATEGORIES, { data });
     if (response.status() === 201) {
-      const { id } = CreatedIdSchema.parse(await response.json());
+      const { id } = IdSchema.parse(await response.json());
       this.cleanup.addDelete(`category ${id}`, () => this.deleteRaw(id));
     }
     return response;
