@@ -41,7 +41,7 @@ export class BrandsClient {
     const response = await this.request.post(BRANDS, { data });
     if (response.status() === 201) {
       const { id } = IdSchema.parse(await response.json());
-      this.cleanup.addDelete(`brand ${id}`, () => this.deleteRaw(id));
+      this.cleanup.addDelete(`brand ${id}`, `${BRANDS}/${id}`);
     }
     return response;
   }

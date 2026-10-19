@@ -40,16 +40,6 @@ async function createAuthedContext(
   });
 }
 
-// Runs cleanup here because request contexts may be disposed in the fixture!
-async function provideApi(
-  request: APIRequestContext,
-  cleanup: Cleanup,
-  use: (api: Api) => Promise<void>
-): Promise<void> {
-  await use(createApi(request, cleanup));
-  await cleanup.run();
-}
-
 export const test = base.extend<ApiFixtures>({
   customerRequest: async ({ playwright, baseURL, extraHTTPHeaders }, use) => {
     const context = await createAuthedContext(
@@ -81,20 +71,22 @@ export const test = base.extend<ApiFixtures>({
     await use(context);
     await context.dispose();
   },
-  cleanup: async ({}, use) => {
-    await use(new Cleanup());
+  cleanup: async ({ adminRequest }, use) => {
+    const cleanup = new Cleanup(adminRequest);
+    await use(cleanup);
+    await cleanup.run();
   },
   api: async ({ adminRequest, cleanup }, use) => {
-    await provideApi(adminRequest, cleanup, use);
+    await use(createApi(adminRequest, cleanup));
   },
   customerApi: async ({ customerRequest, cleanup }, use) => {
-    await provideApi(customerRequest, cleanup, use);
+    await use(createApi(customerRequest, cleanup));
   },
   anonApi: async ({ request, cleanup }, use) => {
-    await provideApi(request, cleanup, use);
+    await use(createApi(request, cleanup));
   },
   invalidTokenApi: async ({ invalidTokenRequest, cleanup }, use) => {
-    await provideApi(invalidTokenRequest, cleanup, use);
+    await use(createApi(invalidTokenRequest, cleanup));
   },
 });
 

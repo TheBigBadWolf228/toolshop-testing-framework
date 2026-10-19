@@ -1,17 +1,19 @@
-import { expect, type APIResponse } from '@playwright/test';
+import { expect, type APIRequestContext } from '@playwright/test';
 
 type CleanupAction = () => Promise<void>;
 
 export class Cleanup {
   private readonly actions: CleanupAction[] = [];
 
+  constructor(private readonly request: APIRequestContext) {}
+
   add(action: CleanupAction): void {
     this.actions.push(action);
   }
 
-  addDelete(label: string, del: () => Promise<APIResponse>): void {
+  addDelete(label: string, path: string): void {
     this.add(async () => {
-      const response = await del();
+      const response = await this.request.delete(path);
       expect(
         [204, 404],
         `cleanup of ${label}: ${response.status()} ${await response.text()}`
