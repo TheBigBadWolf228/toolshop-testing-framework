@@ -5,7 +5,7 @@ import {
   type Brand,
   type BrandRequest,
 } from '../schemas/brand.schema.js';
-import { SuccessSchema } from '../schemas/responses.schema.js';
+import { IdSchema, SuccessSchema } from '../schemas/responses.schema.js';
 import type { Cleanup } from '../support/cleanup.js';
 import { expectStatus } from '../support/expect-status.js';
 
@@ -40,7 +40,7 @@ export class BrandsClient {
   async createRaw(data: Partial<BrandRequest>): Promise<APIResponse> {
     const response = await this.request.post(BRANDS, { data });
     if (response.status() === 201) {
-      const { id } = BrandSchema.parse(await response.json());
+      const { id } = IdSchema.parse(await response.json());
       this.cleanup.addDelete(`brand ${id}`, () => this.deleteRaw(id));
     }
     return response;

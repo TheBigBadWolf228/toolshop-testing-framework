@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 export const SuccessSchema = z.object({ success: z.boolean() });
 
+export const IdSchema = z.object({ id: z.string() });
+
 export const ValidationErrorsSchema = z.record(z.string(), z.array(z.string()));
 
 export const paginated = <T extends z.ZodType>(item: T) =>
