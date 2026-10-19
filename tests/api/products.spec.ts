@@ -13,6 +13,8 @@ import type {
   ProductListItem,
   ProductRequest,
 } from './schemas/product.schema.js';
+import { MessageSchema } from './schemas/responses.schema.js';
+import { expectSchema } from './support/expect-schema.js';
 
 interface ProductDeps {
   brand: Brand;
@@ -159,5 +161,45 @@ test.describe('products CRUD', () => {
 
     const response = await api.products.getRaw(created.id);
     expect(response.status()).toBe(404);
+  });
+});
+
+test.describe('products access control', () => {
+  test('should not delete the product when no token is sent', async ({
+    api,
+    anonApi,
+  }) => {
+    const deps = await createDeps(api);
+    const created = await api.products.create(buildProduct(refsOf(deps)));
+
+    const response = await anonApi.products.deleteRaw(created.id);
+
+    expect(response.status()).toBe(401);
+    const body = expectSchema(
+      MessageSchema,
+      await response.json(),
+      'DELETE /products 401'
+    );
+    expect(body.message).toBe('Unauthorized');
+    expect((await api.products.getRaw(created.id)).status()).toBe(200);
+  });
+
+  test('should not delete the product when the user is a customer', async ({
+    api,
+    customerApi,
+  }) => {
+    const deps = await createDeps(api);
+    const created = await api.products.create(buildProduct(refsOf(deps)));
+
+    const response = await customerApi.products.deleteRaw(created.id);
+
+    expect(response.status()).toBe(403);
+    const body = expectSchema(
+      MessageSchema,
+      await response.json(),
+      'DELETE /products 403'
+    );
+    expect(body.message).toBe('Forbidden');
+    expect((await api.products.getRaw(created.id)).status()).toBe(200);
   });
 });
