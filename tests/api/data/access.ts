@@ -19,3 +19,19 @@ export const NON_ADMIN_CALLERS: readonly DeniedCaller[] = [
   { caller: 'invalidToken', ...UNAUTHORIZED },
   { caller: 'customer', ...FORBIDDEN },
 ];
+
+export const UNKNOWN_ID = '01ZZZZZZZZZZZZZZZZZZZZZZZZ';
+
+export const NOT_FOUND: Denial = {
+  status: 404,
+  message: 'Requested item not found',
+};
+export const METHOD_NOT_ALLOWED: Denial = {
+  status: 405,
+  message: 'Method is not allowed for the requested route',
+};
+
+export const WRONG_METHODS = {
+  collection: ['PUT', 'PATCH', 'DELETE'],
+  item: ['POST'],
+} as const;
