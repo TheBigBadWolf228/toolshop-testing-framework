@@ -1,6 +1,7 @@
 import { test, expect } from './support/fixtures.js';
 import { buildBrand } from './factories/brand.factory.js';
 import { ValidationErrorsSchema } from './schemas/responses.schema.js';
+import { expectSchema } from './support/expect-schema.js';
 
 test.describe('brands CRUD', () => {
   test('should create a brand when valid data is sent', async ({ api }) => {
@@ -78,7 +79,11 @@ test.describe('brands rules', () => {
     );
 
     expect(response.status()).toBe(409);
-    const errors = ValidationErrorsSchema.parse(await response.json());
+    const errors = expectSchema(
+      ValidationErrorsSchema,
+      await response.json(),
+      'POST /brands 409'
+    );
     expect(errors).toHaveProperty('slug');
   });
 
@@ -88,7 +93,11 @@ test.describe('brands rules', () => {
     const response = await api.brands.createRaw({});
 
     expect(response.status()).toBe(422);
-    const errors = ValidationErrorsSchema.parse(await response.json());
+    const errors = expectSchema(
+      ValidationErrorsSchema,
+      await response.json(),
+      'POST /brands 422'
+    );
     expect(Object.keys(errors).sort()).toEqual(['name', 'slug']);
   });
 
