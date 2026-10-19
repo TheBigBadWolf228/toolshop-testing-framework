@@ -1,5 +1,13 @@
+import type { APIResponse } from '@playwright/test';
 import { test, expect } from './support/fixtures.js';
-import { NON_ADMIN_CALLERS } from './data/access.js';
+import type { Api } from './clients/api.js';
+import {
+  METHOD_NOT_ALLOWED,
+  NON_ADMIN_CALLERS,
+  NOT_FOUND,
+  UNKNOWN_ID,
+  WRONG_METHODS,
+} from './data/access.js';
 import { BRAND_REQUIRED_FIELDS } from './data/brands.js';
 import { buildBrand } from './factories/brand.factory.js';
 import { ValidationErrorsSchema } from './schemas/responses.schema.js';
@@ -114,6 +122,50 @@ test.describe('brands rules', () => {
 
       await expectDenied(response, denial, 'DELETE /brands');
       expect((await api.brands.getRaw(created.id)).status()).toBe(200);
+    });
+  }
+});
+
+test.describe('brands not found and wrong method', () => {
+  const unknownIdCalls: Record<string, (api: Api) => Promise<APIResponse>> = {
+    GET: (api) => api.brands.getRaw(UNKNOWN_ID),
+    PUT: (api) => api.brands.updateRaw(UNKNOWN_ID, buildBrand()),
+    PATCH: (api) =>
+      api.brands.patchRaw(UNKNOWN_ID, { name: buildBrand().name }),
+    DELETE: (api) => api.brands.deleteRaw(UNKNOWN_ID),
+  };
+
+  for (const [method, call] of Object.entries(unknownIdCalls)) {
+    test(`should return 404 when ${method} targets an unknown brand`, async ({
+      api,
+    }) => {
+      await expectDenied(await call(api), NOT_FOUND, `${method} /brands/{id}`);
+    });
+  }
+
+  for (const method of WRONG_METHODS.collection) {
+    test(`should return 405 when ${method} is sent to the brand list`, async ({
+      adminRequest,
+    }) => {
+      const response = await adminRequest.fetch('/brands', { method });
+
+      await expectDenied(response, METHOD_NOT_ALLOWED, `${method} /brands`);
+    });
+  }
+
+  for (const method of WRONG_METHODS.item) {
+    test(`should return 405 when ${method} is sent to a single brand`, async ({
+      adminRequest,
+    }) => {
+      const response = await adminRequest.fetch(`/brands/${UNKNOWN_ID}`, {
+        method,
+      });
+
+      await expectDenied(
+        response,
+        METHOD_NOT_ALLOWED,
+        `${method} /brands/{id}`
+      );
     });
   }
 });
