@@ -101,7 +101,9 @@ test.describe('brands rules', () => {
       await response.json(),
       'POST /brands 422'
     );
-    expect(Object.keys(errors).sort()).toEqual(BRAND_REQUIRED_FIELDS);
+    expect(Object.keys(errors).sort()).toEqual(
+      [...BRAND_REQUIRED_FIELDS].sort()
+    );
   });
 
   for (const { caller, ...denial } of NON_ADMIN_CALLERS) {

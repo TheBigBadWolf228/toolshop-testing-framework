@@ -13,8 +13,10 @@ import type {
   ProductListItem,
   ProductRequest,
 } from './schemas/product.schema.js';
-import { MessageSchema } from './schemas/responses.schema.js';
-import { expectSchema } from './support/expect-schema.js';
+import { NON_ADMIN_CALLERS } from './data/access.js';
+import { PRODUCT_WRITE_WITHOUT_AUTH } from './data/known-bugs.js';
+import { ECO_FRIENDLY_RATINGS } from './data/products.js';
+import { expectDenied } from './support/expect-denied.js';
 
 interface ProductDeps {
   brand: Brand;
@@ -44,7 +46,7 @@ function baseFields(id: string, data: ProductRequest, image: Image) {
     id,
     ...fields,
     in_stock: null,
-    is_eco_friendly: ['A', 'B'].includes(data.co2_rating),
+    is_eco_friendly: ECO_FRIENDLY_RATINGS.includes(data.co2_rating),
     product_image: image,
   };
 }
@@ -165,60 +167,74 @@ test.describe('products CRUD', () => {
 });
 
 test.describe('products access control', () => {
-  test('should not delete the product when no token is sent', async ({
-    api,
-    anonApi,
-  }) => {
-    const deps = await createDeps(api);
-    const created = await api.products.create(buildProduct(refsOf(deps)));
+  for (const { caller, ...denial } of NON_ADMIN_CALLERS) {
+    test(`should not delete the product as ${caller}`, async ({
+      api,
+      apiAs,
+    }) => {
+      const deps = await createDeps(api);
+      const created = await api.products.create(buildProduct(refsOf(deps)));
 
-    const response = await anonApi.products.deleteRaw(created.id);
+      const response = await apiAs(caller).products.deleteRaw(created.id);
 
-    expect(response.status()).toBe(401);
-    const body = expectSchema(
-      MessageSchema,
-      await response.json(),
-      'DELETE /products 401'
+      await expectDenied(response, denial, 'DELETE /products');
+      expect((await api.products.getRaw(created.id)).status()).toBe(200);
+    });
+
+    test.fail(
+      `should not create a product as ${caller}`,
+      PRODUCT_WRITE_WITHOUT_AUTH,
+      async ({ api, apiAs }) => {
+        const deps = await createDeps(api);
+
+        const response = await apiAs(caller).products.createRaw(
+          buildProduct(refsOf(deps))
+        );
+
+        await expectDenied(response, denial, 'POST /products');
+        const page = await api.products.list({ by_category: deps.category.id });
+        expect(page.total).toBe(0);
+      }
     );
-    expect(body.message).toBe('Unauthorized');
-    expect((await api.products.getRaw(created.id)).status()).toBe(200);
-  });
 
-  test('should not delete the product when the token is invalid', async ({
-    api,
-    invalidTokenApi,
-  }) => {
-    const deps = await createDeps(api);
-    const created = await api.products.create(buildProduct(refsOf(deps)));
+    test.fail(
+      `should not replace the product as ${caller}`,
+      PRODUCT_WRITE_WITHOUT_AUTH,
+      async ({ api, apiAs }) => {
+        const deps = await createDeps(api);
+        const data = buildProduct(refsOf(deps));
+        const created = await api.products.create(data);
 
-    const response = await invalidTokenApi.products.deleteRaw(created.id);
+        const response = await apiAs(caller).products.updateRaw(
+          created.id,
+          buildProduct(refsOf(deps))
+        );
 
-    expect(response.status()).toBe(401);
-    const body = expectSchema(
-      MessageSchema,
-      await response.json(),
-      'DELETE /products 401'
+        await expectDenied(response, denial, 'PUT /products');
+        expect(await api.products.get(created.id)).toEqual(
+          productDetail(created.id, data, deps)
+        );
+      }
     );
-    expect(body.message).toBe('Unauthorized');
-    expect((await api.products.getRaw(created.id)).status()).toBe(200);
-  });
 
-  test('should not delete the product when the user is a customer', async ({
-    api,
-    customerApi,
-  }) => {
-    const deps = await createDeps(api);
-    const created = await api.products.create(buildProduct(refsOf(deps)));
+    test.fail(
+      `should not patch the product as ${caller}`,
+      PRODUCT_WRITE_WITHOUT_AUTH,
+      async ({ api, apiAs }) => {
+        const deps = await createDeps(api);
+        const data = buildProduct(refsOf(deps));
+        const created = await api.products.create(data);
+        const { price } = buildProduct(refsOf(deps));
 
-    const response = await customerApi.products.deleteRaw(created.id);
+        const response = await apiAs(caller).products.patchRaw(created.id, {
+          price,
+        });
 
-    expect(response.status()).toBe(403);
-    const body = expectSchema(
-      MessageSchema,
-      await response.json(),
-      'DELETE /products 403'
+        await expectDenied(response, denial, 'PATCH /products');
+        expect(await api.products.get(created.id)).toEqual(
+          productDetail(created.id, data, deps)
+        );
+      }
     );
-    expect(body.message).toBe('Forbidden');
-    expect((await api.products.getRaw(created.id)).status()).toBe(200);
-  });
+  }
 });
