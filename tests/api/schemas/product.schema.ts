@@ -69,6 +69,7 @@ export const ProductListItemSchema = ProductBaseSchema.extend({
 
 export const ProductPageSchema = paginated(ProductListItemSchema);
 
+export type Co2Rating = z.infer<typeof Co2RatingSchema>;
 export type ProductRequest = z.infer<typeof ProductRequestSchema>;
 export type Product = z.infer<typeof ProductSchema>;
 export type CreatedProduct = z.infer<typeof CreatedProductSchema>;

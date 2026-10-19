@@ -1,5 +1,7 @@
 import { test, expect } from './support/fixtures.js';
 import { getCredentials } from '../support/users.js';
+import { UNAUTHORIZED } from './data/access.js';
+import { expectDenied } from './support/expect-denied.js';
 
 interface CurrentUser {
   email: string;
@@ -30,5 +32,5 @@ test('should return the admin when admin token is sent', async ({
 test('should reject the request when token is missing', async ({ request }) => {
   const response = await request.get('/users/me');
 
-  expect(response.status()).toBe(401);
+  await expectDenied(response, UNAUTHORIZED, 'GET /users/me');
 });
