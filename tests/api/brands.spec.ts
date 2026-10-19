@@ -1,6 +1,9 @@
 import { test, expect } from './support/fixtures.js';
+import { NON_ADMIN_CALLERS } from './data/access.js';
+import { BRAND_REQUIRED_FIELDS } from './data/brands.js';
 import { buildBrand } from './factories/brand.factory.js';
 import { ValidationErrorsSchema } from './schemas/responses.schema.js';
+import { expectDenied } from './support/expect-denied.js';
 import { expectSchema } from './support/expect-schema.js';
 
 test.describe('brands CRUD', () => {
@@ -98,28 +101,19 @@ test.describe('brands rules', () => {
       await response.json(),
       'POST /brands 422'
     );
-    expect(Object.keys(errors).sort()).toEqual(['name', 'slug']);
+    expect(Object.keys(errors).sort()).toEqual(
+      [...BRAND_REQUIRED_FIELDS].sort()
+    );
   });
 
-  test('should not delete the brand when no token is sent', async ({
-    api,
-    anonApi,
-  }) => {
-    const created = await api.brands.create(buildBrand());
+  for (const { caller, ...denial } of NON_ADMIN_CALLERS) {
+    test(`should not delete the brand as ${caller}`, async ({ api, apiAs }) => {
+      const created = await api.brands.create(buildBrand());
 
-    const response = await anonApi.brands.deleteRaw(created.id);
+      const response = await apiAs(caller).brands.deleteRaw(created.id);
 
-    expect(response.status()).toBe(401);
-  });
-
-  test('should not delete the brand when the user is a customer', async ({
-    api,
-    customerApi,
-  }) => {
-    const created = await api.brands.create(buildBrand());
-
-    const response = await customerApi.brands.deleteRaw(created.id);
-
-    expect(response.status()).toBe(403);
-  });
+      await expectDenied(response, denial, 'DELETE /brands');
+      expect((await api.brands.getRaw(created.id)).status()).toBe(200);
+    });
+  }
 });

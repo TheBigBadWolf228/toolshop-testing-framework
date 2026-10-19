@@ -2,6 +2,10 @@ import { requireEnv } from './env.js';
 
 export type Role = 'customer' | 'admin';
 
+export type ApiRole = Role | 'invalidToken';
+
+export type ApiCaller = ApiRole | 'anon';
+
 export interface Credentials {
   email: string;
   password: string;

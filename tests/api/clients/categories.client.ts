@@ -44,7 +44,7 @@ export class CategoriesClient {
     const response = await this.request.post(CATEGORIES, { data });
     if (response.status() === 201) {
       const { id } = IdSchema.parse(await response.json());
-      this.cleanup.addDelete(`category ${id}`, () => this.deleteRaw(id));
+      this.cleanup.addDelete(`category ${id}`, `${CATEGORIES}/${id}`);
     }
     return response;
   }

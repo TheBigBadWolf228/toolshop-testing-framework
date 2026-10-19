@@ -50,7 +50,7 @@ export class ProductsClient {
     const response = await this.request.post(PRODUCTS, { data });
     if (response.status() === 201) {
       const { id } = IdSchema.parse(await response.json());
-      this.cleanup.addDelete(`product ${id}`, () => this.deleteRaw(id));
+      this.cleanup.addDelete(`product ${id}`, `${PRODUCTS}/${id}`);
     }
     return response;
   }
