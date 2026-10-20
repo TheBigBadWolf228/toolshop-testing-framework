@@ -1,10 +1,12 @@
 import type { Locator, Page } from '@playwright/test';
 import { Filters } from '../components/filters.component.js';
+import { Header } from '../components/header.component.js';
 import { ProductGrid } from '../components/product-grid.component.js';
 
 export class HomePage {
   static readonly path = '/';
 
+  readonly header: Header;
   readonly grid: ProductGrid;
   readonly filters: Filters;
   readonly searchInput: Locator;
@@ -12,6 +14,7 @@ export class HomePage {
   readonly resetButton: Locator;
 
   constructor(private readonly page: Page) {
+    this.header = new Header(page);
     this.grid = new ProductGrid(page);
     this.filters = new Filters(page);
     this.searchInput = page.getByTestId('search-query');

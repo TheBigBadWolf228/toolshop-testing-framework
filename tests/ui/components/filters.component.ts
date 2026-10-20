@@ -7,12 +7,21 @@ export class Filters {
   readonly minPriceSlider: Locator;
   readonly maxPriceSlider: Locator;
 
+  private readonly root: Locator;
+
   constructor(page: Page) {
-    this.minPriceSlider = page.getByRole('slider', {
+    this.root = page.getByTestId('filters');
+    this.minPriceSlider = this.root.getByRole('slider', {
       name: 'ngx-slider',
       exact: true,
     });
-    this.maxPriceSlider = page.getByRole('slider', { name: 'ngx-slider-max' });
+    this.maxPriceSlider = this.root.getByRole('slider', {
+      name: 'ngx-slider-max',
+    });
+  }
+
+  async check(label: string): Promise<void> {
+    await this.root.getByRole('checkbox', { name: label, exact: true }).check();
   }
 
   async setPriceRange(min: number, max: number): Promise<void> {

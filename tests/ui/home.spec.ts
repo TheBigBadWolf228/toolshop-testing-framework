@@ -28,7 +28,7 @@ test('should show only products within the price range', async ({ page }) => {
     );
     expect(prices.length).toBeGreaterThan(0);
     expect(outOfRange).toEqual([]);
-  }).toPass();
+  }).toPass({ timeout: 10_000 });
 });
 
 test('should find a product by name and reset the search', async ({ page }) => {
@@ -57,5 +57,5 @@ test('should show different products on another page', async ({ page }) => {
     );
     expect(otherPageNames.length).toBeGreaterThan(0);
     expect(repeated).toEqual([]);
-  }).toPass();
+  }).toPass({ timeout: 10_000 });
 });
