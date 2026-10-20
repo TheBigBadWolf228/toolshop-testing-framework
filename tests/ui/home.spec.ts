@@ -1,97 +1,61 @@
 import { test, expect } from '@playwright/test';
+import {
+  PAGINATION_TARGET_PAGE,
+  PRICE_RANGE,
+  SEARCH_TERM,
+} from './data/shop.js';
+import { HomePage } from './pages/home.page.js';
 
-test('should apply price filter', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.getByTestId('product-name')).toHaveCount(9);
+test('should show only products within the price range', async ({ page }) => {
+  const homePage = new HomePage(page);
+  await homePage.open();
 
-  const firstElementBeforeFiltering = await page
-    .getByTestId('product-name')
-    .first()
-    .innerText();
+  await homePage.filters.setPriceRange(PRICE_RANGE.min, PRICE_RANGE.max);
 
-  await page.getByRole('slider', { name: 'ngx-slider-max' }).press('End');
-
-  await page
-    .getByRole('slider', { name: 'ngx-slider', exact: true })
-    .press('Home');
-  for (let i = 0; i < 5; i++) {
-    await page
-      .getByRole('slider', { name: 'ngx-slider', exact: true })
-      .press('PageUp');
-  }
-
-  await expect(
-    page.getByRole('slider', { name: 'ngx-slider-max' })
-  ).toHaveAttribute('aria-valuenow', '200');
-  await expect(
-    page.getByRole('slider', { name: 'ngx-slider', exact: true })
-  ).toHaveAttribute('aria-valuenow', '100');
-
-  await expect(page.getByTestId('product-name')).toHaveCount(5);
-
-  await expect(page.getByTestId('product-name').first()).not.toHaveText(
-    firstElementBeforeFiltering
+  await expect(homePage.filters.minPriceSlider).toHaveAttribute(
+    'aria-valuenow',
+    String(PRICE_RANGE.min)
   );
+  await expect(homePage.filters.maxPriceSlider).toHaveAttribute(
+    'aria-valuenow',
+    String(PRICE_RANGE.max)
+  );
+
+  await expect(async () => {
+    const prices = await homePage.grid.readPrices();
+    const outOfRange = prices.filter(
+      (price) => price < PRICE_RANGE.min || price > PRICE_RANGE.max
+    );
+    expect(prices.length).toBeGreaterThan(0);
+    expect(outOfRange).toEqual([]);
+  }).toPass({ timeout: 10_000 });
 });
 
-test('should search and reset search results', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.getByTestId('product-name')).toHaveCount(9);
+test('should find a product by name and reset the search', async ({ page }) => {
+  const homePage = new HomePage(page);
+  await homePage.open();
+  const namesBeforeSearch = await homePage.grid.readNames();
 
-  const firstElementBeforeSearching = await page
-    .getByTestId('product-name')
-    .first()
-    .innerText();
+  await homePage.search(SEARCH_TERM);
+  await expect(homePage.grid.names).toHaveText([SEARCH_TERM]);
 
-  await page.getByPlaceholder('Search').fill('Protective Gloves');
-  await page.getByRole('button', { name: 'Search' }).click();
-
-  await expect(page.getByTestId('product-name')).toHaveCount(1);
-
-  await expect(page.getByTestId('product-name').first()).not.toHaveText(
-    firstElementBeforeSearching
-  );
-
-  await expect(page.getByTestId('product-name').first()).toHaveText(
-    'Protective Gloves'
-  );
-
-  await page.getByRole('button', { name: 'X' }).click();
-  await expect(page.getByTestId('product-name').first()).toHaveText(
-    firstElementBeforeSearching
-  );
-
-  await expect(page.getByTestId('product-name')).toHaveCount(9);
+  await homePage.resetSearch();
+  await expect(homePage.grid.names).toHaveText(namesBeforeSearch);
 });
 
-test('should paginate', async ({ page }) => {
-  await page.goto('/');
+test('should show different products on another page', async ({ page }) => {
+  const homePage = new HomePage(page);
+  await homePage.open();
+  const firstPageNames = await homePage.grid.readNames();
 
-  const firstElementBeforePagination = await page
-    .getByTestId('product-name')
-    .first()
-    .innerText();
+  await homePage.goToPage(PAGINATION_TARGET_PAGE);
 
-  const productTitlesBeforePagination = await page
-    .getByTestId('product-name')
-    .allTextContents();
-
-  await page.getByRole('listitem').filter({ hasText: '5' }).click();
-
-  // page is truly reloaded
-  await expect(page.getByTestId('product-name').first()).not.toHaveText(
-    firstElementBeforePagination
-  );
-
-  const productTitlesAfterPagination = await page
-    .getByTestId('product-name')
-    .allTextContents();
-
-  expect(
-    productTitlesAfterPagination.every(
-      (title) => !productTitlesBeforePagination.includes(title)
-    )
-  ).toBe(true);
+  await expect(async () => {
+    const otherPageNames = await homePage.grid.readNames();
+    const repeated = otherPageNames.filter((name) =>
+      firstPageNames.includes(name)
+    );
+    expect(otherPageNames.length).toBeGreaterThan(0);
+    expect(repeated).toEqual([]);
+  }).toPass({ timeout: 10_000 });
 });
-
-// Note: use deligation when make POM for the shop component for different pages!

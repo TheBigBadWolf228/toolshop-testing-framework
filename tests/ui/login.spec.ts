@@ -1,41 +1,49 @@
 import { test, expect } from '@playwright/test';
 
+import { authFile } from '../support/auth.js';
 import { getCredentials } from '../support/users.js';
+import { INVALID_CREDENTIALS } from './data/shop.js';
+import { AccountPage } from './pages/account.page.js';
+import { LoginPage } from './pages/login.page.js';
 
 const { email, password } = getCredentials('customer');
 
 test('should login with valid credentials', async ({ page }) => {
-  await page.goto('/');
+  const loginPage = new LoginPage(page);
+  const accountPage = new AccountPage(page);
+  await loginPage.open();
 
-  await page.getByText('Sign In').click();
-  await page.waitForURL(`/auth/login`);
+  await loginPage.login(email, password);
 
-  await page.getByPlaceholder('Your email').fill(email);
-  await page.getByPlaceholder('Your password').fill(password);
+  await expect(page).toHaveURL(AccountPage.path);
+  await expect(accountPage.heading).toBeVisible();
+});
 
-  await page.getByRole('button', { name: 'Login' }).click();
-  await page.waitForURL(`/account`);
+test.describe('as customer', () => {
+  test.use({ storageState: authFile('customer') });
 
-  await expect(page.getByRole('heading', { name: 'My account' })).toBeVisible();
+  test('should log out', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    const accountPage = new AccountPage(page);
+    await accountPage.open();
+    await expect(accountPage.heading).toBeVisible();
 
-  await page.getByRole('button', { name: 'Jane Doe' }).click();
-  await page.getByRole('listitem').filter({ hasText: 'Sign out' }).click();
+    await accountPage.header.signOut();
 
-  await page.waitForURL(`/auth/login`);
-  await expect(page.getByRole('heading', { name: 'Login' })).toBeVisible();
+    await expect(page).toHaveURL(LoginPage.path);
+    await expect(loginPage.heading).toBeVisible();
+  });
 });
 
 test('should not login with invalid credentials', async ({ page }) => {
-  await page.goto('/');
+  const loginPage = new LoginPage(page);
+  await loginPage.open();
 
-  await page.getByText('Sign In').click();
-  await page.waitForURL('/auth/login');
+  await loginPage.login(
+    INVALID_CREDENTIALS.email,
+    INVALID_CREDENTIALS.password
+  );
 
-  await page.getByPlaceholder('Your email').fill('invalid@example.com');
-  await page.getByPlaceholder('Your password').fill('qwerty123');
-  await page.getByRole('button', { name: 'Login' }).click();
-
-  await expect(page.getByText('Invalid email or password')).toBeVisible();
-
-  await expect(page).toHaveURL('/auth/login');
+  await expect(loginPage.errorMessage).toBeVisible();
+  await expect(page).toHaveURL(LoginPage.path);
 });
