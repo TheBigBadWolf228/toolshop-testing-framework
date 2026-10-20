@@ -1,41 +1,39 @@
 import { test, expect } from '@playwright/test';
 
 import { getCredentials } from '../support/users.js';
+import { LoginPage } from './pages/login.page.js';
 
 const { email, password } = getCredentials('customer');
 
 test('should login with valid credentials', async ({ page }) => {
-  await page.goto('/');
+  const loginPage = new LoginPage(page);
+  await loginPage.open();
 
-  await page.getByText('Sign In').click();
-  await page.waitForURL(`/auth/login`);
+  await loginPage.login(email, password);
 
-  await page.getByPlaceholder('Your email').fill(email);
-  await page.getByPlaceholder('Your password').fill(password);
-
-  await page.getByRole('button', { name: 'Login' }).click();
-  await page.waitForURL(`/account`);
-
+  await expect(page).toHaveURL('/account');
   await expect(page.getByRole('heading', { name: 'My account' })).toBeVisible();
+});
 
-  await page.getByRole('button', { name: 'Jane Doe' }).click();
+test('should log out', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  await loginPage.open();
+  await loginPage.login(email, password);
+  await expect(page).toHaveURL('/account');
+
+  await page.getByTestId('nav-menu').click();
   await page.getByRole('listitem').filter({ hasText: 'Sign out' }).click();
 
-  await page.waitForURL(`/auth/login`);
-  await expect(page.getByRole('heading', { name: 'Login' })).toBeVisible();
+  await expect(page).toHaveURL('/auth/login');
+  await expect(loginPage.heading).toBeVisible();
 });
 
 test('should not login with invalid credentials', async ({ page }) => {
-  await page.goto('/');
+  const loginPage = new LoginPage(page);
+  await loginPage.open();
 
-  await page.getByText('Sign In').click();
-  await page.waitForURL('/auth/login');
+  await loginPage.login('invalid@example.com', 'qwerty123');
 
-  await page.getByPlaceholder('Your email').fill('invalid@example.com');
-  await page.getByPlaceholder('Your password').fill('qwerty123');
-  await page.getByRole('button', { name: 'Login' }).click();
-
-  await expect(page.getByText('Invalid email or password')).toBeVisible();
-
+  await expect(loginPage.errorMessage).toBeVisible();
   await expect(page).toHaveURL('/auth/login');
 });
