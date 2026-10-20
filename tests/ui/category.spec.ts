@@ -9,6 +9,7 @@ test('should sort hand tools by CO2 rating from A to E', async ({ page }) => {
   await homePage.open();
   await homePage.header.openCategory(CO2_SORT.category);
   await expect(categoryPage.title).toHaveText(`Category: ${CO2_SORT.category}`);
+  await expect(categoryPage.grid.names.first()).toBeVisible();
 
   await categoryPage.sortBy(CO2_SORT.option);
 
@@ -27,6 +28,7 @@ test('should show only MightyCraft drills in power tools', async ({ page }) => {
   await expect(categoryPage.title).toHaveText(
     `Category: ${DRILL_FILTER.category}`
   );
+  await expect(categoryPage.grid.names.first()).toBeVisible();
 
   await categoryPage.filters.check(DRILL_FILTER.type);
   await expect
