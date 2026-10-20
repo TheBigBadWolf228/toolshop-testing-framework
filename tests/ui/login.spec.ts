@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 import { getCredentials } from '../support/users.js';
+import { AccountPage } from './pages/account.page.js';
 import { LoginPage } from './pages/login.page.js';
 
 const { email, password } = getCredentials('customer');
@@ -11,15 +12,15 @@ test('should login with valid credentials', async ({ page }) => {
 
   await loginPage.login(email, password);
 
-  await expect(page).toHaveURL('/account');
-  await expect(page.getByRole('heading', { name: 'My account' })).toBeVisible();
+  await expect(page).toHaveURL(AccountPage.path);
+  await expect(new AccountPage(page).heading).toBeVisible();
 });
 
 test('should log out', async ({ page }) => {
   const loginPage = new LoginPage(page);
   await loginPage.open();
   await loginPage.login(email, password);
-  await expect(page).toHaveURL('/account');
+  await expect(page).toHaveURL(AccountPage.path);
 
   await page.getByTestId('nav-menu').click();
   await page.getByRole('listitem').filter({ hasText: 'Sign out' }).click();

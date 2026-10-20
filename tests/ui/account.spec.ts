@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { authFile } from '../support/auth.js';
+import { AccountPage } from './pages/account.page.js';
+import { AdminDashboardPage } from './pages/admin-dashboard.page.js';
 
 test.describe('as customer', () => {
   test.use({ storageState: authFile('customer') });
@@ -7,11 +9,10 @@ test.describe('as customer', () => {
   test('should open my account without logging in via the form', async ({
     page,
   }) => {
-    await page.goto('/account');
+    const accountPage = new AccountPage(page);
+    await accountPage.open();
 
-    await expect(
-      page.getByRole('heading', { name: 'My account' })
-    ).toBeVisible();
+    await expect(accountPage.heading).toBeVisible();
   });
 });
 
@@ -21,10 +22,9 @@ test.describe('as admin', () => {
   test('should open the admin dashboard without logging in via the form', async ({
     page,
   }) => {
-    await page.goto('/admin/dashboard');
+    const dashboardPage = new AdminDashboardPage(page);
+    await dashboardPage.open();
 
-    await expect(
-      page.getByRole('heading', { name: 'Sales over the years' })
-    ).toBeVisible();
+    await expect(dashboardPage.heading).toBeVisible();
   });
 });
