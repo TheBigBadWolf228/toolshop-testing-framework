@@ -1,16 +1,13 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/fixtures.js';
 import { authFile } from '../support/auth.js';
 import { ADMIN_DASHBOARD_RENDER_ERROR } from './data/known-bugs.js';
-import { AccountPage } from './pages/account.page.js';
-import { AdminDashboardPage } from './pages/admin-dashboard.page.js';
 
 test.describe('as customer', () => {
   test.use({ storageState: authFile('customer') });
 
   test('should open my account without logging in via the form', async ({
-    page,
+    accountPage,
   }) => {
-    const accountPage = new AccountPage(page);
     await accountPage.open();
 
     await expect(accountPage.heading).toBeVisible();
@@ -22,11 +19,10 @@ test.describe('as admin', ADMIN_DASHBOARD_RENDER_ERROR, () => {
   test.use({ storageState: authFile('admin') });
 
   test('should open the admin dashboard without logging in via the form', async ({
-    page,
+    adminDashboardPage,
   }) => {
-    const dashboardPage = new AdminDashboardPage(page);
-    await dashboardPage.open();
+    await adminDashboardPage.open();
 
-    await expect(dashboardPage.heading).toBeVisible();
+    await expect(adminDashboardPage.heading).toBeVisible();
   });
 });

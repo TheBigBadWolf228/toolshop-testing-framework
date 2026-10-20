@@ -1,13 +1,13 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/fixtures.js';
 import {
   PAGINATION_TARGET_PAGE,
   PRICE_RANGE,
   SEARCH_TERM,
 } from './data/shop.js';
-import { HomePage } from './pages/home.page.js';
 
-test('should show only products within the price range', async ({ page }) => {
-  const homePage = new HomePage(page);
+test('should show only products within the price range', async ({
+  homePage,
+}) => {
   await homePage.open();
 
   await homePage.filters.setPriceRange(PRICE_RANGE.min, PRICE_RANGE.max);
@@ -31,8 +31,9 @@ test('should show only products within the price range', async ({ page }) => {
   }).toPass({ timeout: 10_000 });
 });
 
-test('should find a product by name and reset the search', async ({ page }) => {
-  const homePage = new HomePage(page);
+test('should find a product by name and reset the search', async ({
+  homePage,
+}) => {
   await homePage.open();
   const namesBeforeSearch = await homePage.grid.readNames();
 
@@ -43,8 +44,7 @@ test('should find a product by name and reset the search', async ({ page }) => {
   await expect(homePage.grid.names).toHaveText(namesBeforeSearch);
 });
 
-test('should show different products on another page', async ({ page }) => {
-  const homePage = new HomePage(page);
+test('should show different products on another page', async ({ homePage }) => {
   await homePage.open();
   const firstPageNames = await homePage.grid.readNames();
 
