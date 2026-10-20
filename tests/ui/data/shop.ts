@@ -22,6 +22,14 @@ export const DRILL_FILTER = {
   brandDrills: ['Cordless Drill 12V'],
 } as const;
 
+export const PRODUCT_DETAILS = {
+  name: 'Combination Pliers',
+  price: '14.15',
+  descriptionStart: 'Versatile combination pliers designed for gripping',
+  related: ['Pliers', 'Bolt Cutters', 'Long Nose Pliers', 'Slip Joint Pliers'],
+  relatedToOpen: 'Long Nose Pliers',
+} as const;
+
 export const INVALID_CREDENTIALS = {
   email: 'invalid@example.com',
   password: 'qwerty123',

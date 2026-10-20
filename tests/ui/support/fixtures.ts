@@ -4,10 +4,12 @@ import { AdminDashboardPage } from '../pages/admin-dashboard.page.js';
 import { CategoryPage } from '../pages/category.page.js';
 import { HomePage } from '../pages/home.page.js';
 import { LoginPage } from '../pages/login.page.js';
+import { ProductPage } from '../pages/product.page.js';
 
 interface UiFixtures {
   homePage: HomePage;
   categoryPage: CategoryPage;
+  productPage: ProductPage;
   loginPage: LoginPage;
   accountPage: AccountPage;
   adminDashboardPage: AdminDashboardPage;
@@ -19,6 +21,9 @@ export const test = base.extend<UiFixtures>({
   },
   categoryPage: async ({ page }, use) => {
     await use(new CategoryPage(page));
+  },
+  productPage: async ({ page }, use) => {
+    await use(new ProductPage(page));
   },
   loginPage: async ({ page }, use) => {
     await use(new LoginPage(page));
