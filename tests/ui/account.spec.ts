@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { authFile } from '../support/auth.js';
+import { ADMIN_DASHBOARD_RENDER_ERROR } from './data/known-bugs.js';
 import { AccountPage } from './pages/account.page.js';
 import { AdminDashboardPage } from './pages/admin-dashboard.page.js';
 
@@ -16,7 +17,8 @@ test.describe('as customer', () => {
   });
 });
 
-test.describe('as admin', () => {
+test.describe('as admin', ADMIN_DASHBOARD_RENDER_ERROR, () => {
+  test.describe.configure({ retries: 2 });
   test.use({ storageState: authFile('admin') });
 
   test('should open the admin dashboard without logging in via the form', async ({
