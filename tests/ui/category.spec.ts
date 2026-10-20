@@ -1,11 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/fixtures.js';
 import { CO2_SORT, DRILL_FILTER } from './data/shop.js';
-import { CategoryPage } from './pages/category.page.js';
-import { HomePage } from './pages/home.page.js';
 
-test('should sort hand tools by CO2 rating from A to E', async ({ page }) => {
-  const homePage = new HomePage(page);
-  const categoryPage = new CategoryPage(page);
+test('should sort hand tools by CO2 rating from A to E', async ({
+  homePage,
+  categoryPage,
+}) => {
   await homePage.open();
   await homePage.header.openCategory(CO2_SORT.category);
   await expect(categoryPage.title).toHaveText(`Category: ${CO2_SORT.category}`);
@@ -20,9 +19,10 @@ test('should sort hand tools by CO2 rating from A to E', async ({ page }) => {
   }).toPass({ timeout: 10_000 });
 });
 
-test('should show only MightyCraft drills in power tools', async ({ page }) => {
-  const homePage = new HomePage(page);
-  const categoryPage = new CategoryPage(page);
+test('should show only MightyCraft drills in power tools', async ({
+  homePage,
+  categoryPage,
+}) => {
   await homePage.open();
   await homePage.header.openCategory(DRILL_FILTER.category);
   await expect(categoryPage.title).toHaveText(

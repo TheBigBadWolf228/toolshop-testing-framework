@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/fixtures.js';
 
 import { authFile } from '../support/auth.js';
 import { getCredentials } from '../support/users.js';
@@ -8,9 +8,11 @@ import { LoginPage } from './pages/login.page.js';
 
 const { email, password } = getCredentials('customer');
 
-test('should login with valid credentials', async ({ page }) => {
-  const loginPage = new LoginPage(page);
-  const accountPage = new AccountPage(page);
+test('should login with valid credentials', async ({
+  page,
+  loginPage,
+  accountPage,
+}) => {
   await loginPage.open();
 
   await loginPage.login(email, password);
@@ -22,9 +24,7 @@ test('should login with valid credentials', async ({ page }) => {
 test.describe('as customer', () => {
   test.use({ storageState: authFile('customer') });
 
-  test('should log out', async ({ page }) => {
-    const loginPage = new LoginPage(page);
-    const accountPage = new AccountPage(page);
+  test('should log out', async ({ page, loginPage, accountPage }) => {
     await accountPage.open();
     await expect(accountPage.heading).toBeVisible();
 
@@ -35,8 +35,10 @@ test.describe('as customer', () => {
   });
 });
 
-test('should not login with invalid credentials', async ({ page }) => {
-  const loginPage = new LoginPage(page);
+test('should not login with invalid credentials', async ({
+  page,
+  loginPage,
+}) => {
   await loginPage.open();
 
   await loginPage.login(
