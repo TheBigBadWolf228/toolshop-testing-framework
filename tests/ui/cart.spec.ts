@@ -59,3 +59,24 @@ test('should empty the cart when the only product is removed', async ({
   await expect(cartPage.emptyMessage).toBeVisible();
   await expect(cartPage.header.cartLink).toBeHidden();
 });
+
+test('should sum the line totals of two products', async ({
+  homePage,
+  productPage,
+  cartPage,
+}) => {
+  const second = CART.secondProduct;
+  await homePage.open();
+  await homePage.search(second.name);
+  await homePage.grid.openProduct(second.name);
+  await expect(productPage.name).toHaveText(second.name);
+
+  await productPage.addToCart();
+  await expect(productPage.header.cartQuantity).toHaveText('2');
+  await productPage.header.openCart();
+
+  await expect(cartPage.titles).toHaveText([name, second.name]);
+  await expect(cartPage.unitPrices).toHaveText([price, second.price]);
+  await expect(cartPage.linePrices).toHaveText([price, second.price]);
+  await expect(cartPage.total).toHaveText(CART.bothProductsTotal);
+});
