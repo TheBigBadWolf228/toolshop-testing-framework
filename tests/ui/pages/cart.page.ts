@@ -9,6 +9,8 @@ export class CartPage {
   readonly unitPrices: Locator;
   readonly linePrices: Locator;
   readonly total: Locator;
+  readonly emptyMessage: Locator;
+  readonly removedAlert: Locator;
 
   constructor(private readonly page: Page) {
     this.header = new Header(page);
@@ -16,6 +18,12 @@ export class CartPage {
     this.unitPrices = page.getByTestId('product-price');
     this.linePrices = page.getByTestId('line-price');
     this.total = page.getByTestId('cart-total');
+    this.emptyMessage = page.getByText(
+      'The cart is empty. Nothing to display.'
+    );
+    this.removedAlert = page
+      .getByRole('alert')
+      .filter({ hasText: 'Product deleted.' });
   }
 
   quantity(name: string): Locator {
@@ -29,5 +37,15 @@ export class CartPage {
     const input = this.quantity(name);
     await input.fill(String(quantity));
     await input.press('Tab');
+  }
+
+  async remove(name: string): Promise<void> {
+    await this.row(name).locator('.btn-danger').click();
+  }
+
+  private row(name: string): Locator {
+    return this.page
+      .getByRole('row')
+      .filter({ has: this.titles.getByText(name, { exact: true }) });
   }
 }

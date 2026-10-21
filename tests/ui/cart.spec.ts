@@ -44,3 +44,18 @@ test('should update the totals when the quantity changes', async ({
   await expect(cartPage.total).toHaveText(CART.quantityTotal);
   await expect(cartPage.header.cartQuantity).toHaveText(String(CART.quantity));
 });
+
+test('should empty the cart when the only product is removed', async ({
+  productPage,
+  cartPage,
+}) => {
+  await productPage.header.openCart();
+  await expect(cartPage.titles).toHaveText([name]);
+
+  await cartPage.remove(name);
+
+  await expect(cartPage.removedAlert).toBeVisible();
+  await expect(cartPage.titles).toHaveCount(0);
+  await expect(cartPage.emptyMessage).toBeVisible();
+  await expect(cartPage.header.cartLink).toBeHidden();
+});
