@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker';
 import { test as base, mergeTests } from '@playwright/test';
 import type {
   CreatedProduct,
@@ -57,7 +58,12 @@ export const test = mergeTests(apiTest, uiTest).extend<SeedFixtures>({
   seedProduct: async ({ api, page, adminRequest }, use) => {
     const carts = new Cleanup(adminRequest);
     trackCarts(page, carts);
-    await use((overrides) => seedProduct(api, overrides));
+    await use((overrides) =>
+      seedProduct(api, {
+        name: `autotest ${faker.string.alphanumeric(10)}`,
+        ...overrides,
+      })
+    );
     await carts.run();
   },
 });
