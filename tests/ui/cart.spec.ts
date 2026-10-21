@@ -5,13 +5,11 @@ import { CartPage } from './pages/cart.page.js';
 const { price, priceText } = CART.product;
 let name: string;
 
-test.beforeEach(async ({ seedProduct, homePage, productPage }) => {
-  ({ name } = await seedProduct({ price, co2_rating: CART.co2Rating }));
+test.beforeEach(async ({ seedProduct, productPage }) => {
+  const product = await seedProduct({ price, co2_rating: CART.co2Rating });
+  name = product.name;
 
-  await homePage.open();
-  await expect(homePage.grid.names.first()).toBeVisible();
-  await homePage.search(name);
-  await homePage.grid.openProduct(name);
+  await productPage.open(product.id);
   await expect(productPage.name).toHaveText(name);
 
   await productPage.addToCart();
@@ -66,19 +64,15 @@ test('should empty the cart when the only product is removed', async ({
 
 test('should sum the line totals of two products', async ({
   seedProduct,
-  homePage,
   productPage,
   cartPage,
 }) => {
   const second = CART.secondProduct;
-  const { name: secondName } = await seedProduct({
+  const { id, name: secondName } = await seedProduct({
     price: second.price,
     co2_rating: CART.co2Rating,
   });
-  await homePage.open();
-  await expect(homePage.grid.names.first()).toBeVisible();
-  await homePage.search(secondName);
-  await homePage.grid.openProduct(secondName);
+  await productPage.open(id);
   await expect(productPage.name).toHaveText(secondName);
 
   await productPage.addToCart();
