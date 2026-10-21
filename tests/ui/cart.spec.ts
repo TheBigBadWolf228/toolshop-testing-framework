@@ -2,10 +2,14 @@ import { test, expect } from './support/fixtures.js';
 import { CART } from './data/shop.js';
 import { CartPage } from './pages/cart.page.js';
 
-const { name, price } = CART.product;
+const { price, priceText } = CART.product;
+let name: string;
 
-test.beforeEach(async ({ homePage, productPage }) => {
+test.beforeEach(async ({ seedProduct, homePage, productPage }) => {
+  ({ name } = await seedProduct({ price, co2_rating: CART.co2Rating }));
+
   await homePage.open();
+  await expect(homePage.grid.names.first()).toBeVisible();
   await homePage.search(name);
   await homePage.grid.openProduct(name);
   await expect(productPage.name).toHaveText(name);
@@ -24,9 +28,9 @@ test('should show an added product in the cart', async ({
   await expect(page).toHaveURL(CartPage.path);
   await expect(cartPage.titles).toHaveText([name]);
   await expect(cartPage.quantity(name)).toHaveValue('1');
-  await expect(cartPage.unitPrices).toHaveText([price]);
-  await expect(cartPage.linePrices).toHaveText([price]);
-  await expect(cartPage.total).toHaveText(price);
+  await expect(cartPage.unitPrices).toHaveText([priceText]);
+  await expect(cartPage.linePrices).toHaveText([priceText]);
+  await expect(cartPage.total).toHaveText(priceText);
 });
 
 test('should update the totals when the quantity changes', async ({
@@ -39,7 +43,7 @@ test('should update the totals when the quantity changes', async ({
   await cartPage.setQuantity(name, CART.quantity);
 
   await expect(cartPage.quantity(name)).toHaveValue(String(CART.quantity));
-  await expect(cartPage.unitPrices).toHaveText([price]);
+  await expect(cartPage.unitPrices).toHaveText([priceText]);
   await expect(cartPage.linePrices).toHaveText([CART.quantityTotal]);
   await expect(cartPage.total).toHaveText(CART.quantityTotal);
   await expect(cartPage.header.cartQuantity).toHaveText(String(CART.quantity));
@@ -61,22 +65,28 @@ test('should empty the cart when the only product is removed', async ({
 });
 
 test('should sum the line totals of two products', async ({
+  seedProduct,
   homePage,
   productPage,
   cartPage,
 }) => {
   const second = CART.secondProduct;
+  const { name: secondName } = await seedProduct({
+    price: second.price,
+    co2_rating: CART.co2Rating,
+  });
   await homePage.open();
-  await homePage.search(second.name);
-  await homePage.grid.openProduct(second.name);
-  await expect(productPage.name).toHaveText(second.name);
+  await expect(homePage.grid.names.first()).toBeVisible();
+  await homePage.search(secondName);
+  await homePage.grid.openProduct(secondName);
+  await expect(productPage.name).toHaveText(secondName);
 
   await productPage.addToCart();
   await expect(productPage.header.cartQuantity).toHaveText('2');
   await productPage.header.openCart();
 
-  await expect(cartPage.titles).toHaveText([name, second.name]);
-  await expect(cartPage.unitPrices).toHaveText([price, second.price]);
-  await expect(cartPage.linePrices).toHaveText([price, second.price]);
+  await expect(cartPage.titles).toHaveText([name, secondName]);
+  await expect(cartPage.unitPrices).toHaveText([priceText, second.priceText]);
+  await expect(cartPage.linePrices).toHaveText([priceText, second.priceText]);
   await expect(cartPage.total).toHaveText(CART.bothProductsTotal);
 });

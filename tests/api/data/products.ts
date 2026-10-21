@@ -4,6 +4,7 @@ export const ECO_FRIENDLY_RATINGS: readonly Co2Rating[] = ['A', 'B'];
 
 export const PRODUCT_NAME_MAX_LENGTH = 120;
 export const PRODUCT_PRICE_TOO_LARGE = 1e12;
+export const SEEDED_PRODUCT_STOCK = 10;
 
 export const PRODUCT_REQUIRED_FIELDS: readonly string[] = [
   'name',

@@ -31,8 +31,9 @@ export const PRODUCT_DETAILS = {
 } as const;
 
 export const CART = {
-  product: { name: 'Combination Pliers', price: '$14.15' },
-  secondProduct: { name: 'Slip Joint Pliers', price: '$9.17' },
+  product: { price: 14.15, priceText: '$14.15' },
+  secondProduct: { price: 9.17, priceText: '$9.17' },
+  co2Rating: 'C',
   quantity: 3,
   quantityTotal: '$42.45',
   bothProductsTotal: '$23.32',
