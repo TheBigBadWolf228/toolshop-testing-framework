@@ -6,7 +6,7 @@ const { price, priceText } = CART.product;
 let name: string;
 
 test.beforeEach(async ({ seedProduct, productPage }) => {
-  const product = await seedProduct({ price, co2_rating: CART.co2Rating });
+  const product = await seedProduct({ price });
   name = product.name;
 
   await productPage.open(product.id);
@@ -68,10 +68,7 @@ test('should sum the line totals of two products', async ({
   cartPage,
 }) => {
   const second = CART.secondProduct;
-  const { id, name: secondName } = await seedProduct({
-    price: second.price,
-    co2_rating: CART.co2Rating,
-  });
+  const { id, name: secondName } = await seedProduct({ price: second.price });
   await productPage.open(id);
   await expect(productPage.name).toHaveText(secondName);
 

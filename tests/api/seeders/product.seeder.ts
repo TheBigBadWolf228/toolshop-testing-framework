@@ -13,17 +13,16 @@ export async function seedProduct(
   api: Api,
   overrides: Partial<ProductRequest> = {}
 ): Promise<CreatedProduct> {
-  const brand = await api.brands.create(buildBrand());
-  const category = await api.categories.create(buildCategory());
-  const image = faker.helpers.arrayElement(await api.images.list());
+  const refs = {
+    brand_id: overrides.brand_id ?? (await api.brands.create(buildBrand())).id,
+    category_id:
+      overrides.category_id ??
+      (await api.categories.create(buildCategory())).id,
+    product_image_id:
+      overrides.product_image_id ??
+      faker.helpers.arrayElement(await api.images.list()).id,
+  };
   return api.products.create(
-    buildProduct(
-      {
-        brand_id: brand.id,
-        category_id: category.id,
-        product_image_id: image.id,
-      },
-      { stock: SEEDED_PRODUCT_STOCK, ...overrides }
-    )
+    buildProduct(refs, { stock: SEEDED_PRODUCT_STOCK, ...overrides })
   );
 }

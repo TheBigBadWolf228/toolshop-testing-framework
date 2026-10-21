@@ -1,4 +1,3 @@
-import { faker } from '@faker-js/faker';
 import { test as base, mergeTests } from '@playwright/test';
 import type {
   CreatedProduct,
@@ -7,6 +6,7 @@ import type {
 import { seedProduct } from '../../api/seeders/product.seeder.js';
 import { Cleanup } from '../../api/support/cleanup.js';
 import { test as apiTest } from '../../api/support/fixtures.js';
+import { NON_ECO_CO2_RATING } from '../data/shop.js';
 import { AccountPage } from '../pages/account.page.js';
 import { AdminDashboardPage } from '../pages/admin-dashboard.page.js';
 import { CartPage } from '../pages/cart.page.js';
@@ -59,10 +59,7 @@ export const test = mergeTests(apiTest, uiTest).extend<SeedFixtures>({
     const carts = new Cleanup(adminRequest);
     trackCarts(page, carts);
     await use((overrides) =>
-      seedProduct(api, {
-        name: `autotest ${faker.string.alphanumeric(10)}`,
-        ...overrides,
-      })
+      seedProduct(api, { co2_rating: NON_ECO_CO2_RATING, ...overrides })
     );
     await carts.run();
   },

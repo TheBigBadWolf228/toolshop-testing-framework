@@ -26,14 +26,13 @@ export const PRODUCT_DETAILS = {
   name: 'Combination Pliers',
   price: '14.15',
   descriptionStart: 'Versatile combination pliers designed for gripping',
-  related: ['Pliers', 'Bolt Cutters', 'Long Nose Pliers', 'Slip Joint Pliers'],
-  relatedToOpen: 'Long Nose Pliers',
 } as const;
+
+export const NON_ECO_CO2_RATING = 'C';
 
 export const CART = {
   product: { price: 14.15, priceText: '$14.15' },
   secondProduct: { price: 9.17, priceText: '$9.17' },
-  co2Rating: 'C',
   quantity: 3,
   quantityTotal: '$42.45',
   bothProductsTotal: '$23.32',
