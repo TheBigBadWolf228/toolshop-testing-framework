@@ -1,6 +1,7 @@
 import { test as base } from '@playwright/test';
 import { AccountPage } from '../pages/account.page.js';
 import { AdminDashboardPage } from '../pages/admin-dashboard.page.js';
+import { CartPage } from '../pages/cart.page.js';
 import { CategoryPage } from '../pages/category.page.js';
 import { HomePage } from '../pages/home.page.js';
 import { LoginPage } from '../pages/login.page.js';
@@ -10,6 +11,7 @@ interface UiFixtures {
   homePage: HomePage;
   categoryPage: CategoryPage;
   productPage: ProductPage;
+  cartPage: CartPage;
   loginPage: LoginPage;
   accountPage: AccountPage;
   adminDashboardPage: AdminDashboardPage;
@@ -24,6 +26,9 @@ export const test = base.extend<UiFixtures>({
   },
   productPage: async ({ page }, use) => {
     await use(new ProductPage(page));
+  },
+  cartPage: async ({ page }, use) => {
+    await use(new CartPage(page));
   },
   loginPage: async ({ page }, use) => {
     await use(new LoginPage(page));

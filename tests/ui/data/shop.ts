@@ -30,6 +30,14 @@ export const PRODUCT_DETAILS = {
   relatedToOpen: 'Long Nose Pliers',
 } as const;
 
+export const CART = {
+  product: { name: 'Combination Pliers', price: '$14.15' },
+  secondProduct: { name: 'Slip Joint Pliers', price: '$9.17' },
+  quantity: 3,
+  quantityTotal: '$42.45',
+  bothProductsTotal: '$23.32',
+} as const;
+
 export const INVALID_CREDENTIALS = {
   email: 'invalid@example.com',
   password: 'qwerty123',
