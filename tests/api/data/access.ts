@@ -10,6 +10,7 @@ export interface DeniedCaller extends Denial {
 }
 
 export const INVALID_TOKEN = 'not.a.jwt';
+export const TOKEN_REFRESH_MARGIN_MS = 60_000;
 
 export const UNAUTHORIZED: Denial = { status: 401, message: 'Unauthorized' };
 export const FORBIDDEN: Denial = { status: 403, message: 'Forbidden' };

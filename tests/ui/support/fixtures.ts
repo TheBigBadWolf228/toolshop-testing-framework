@@ -6,6 +6,8 @@ import type {
 import { seedProduct } from '../../api/seeders/product.seeder.js';
 import { Cleanup } from '../../api/support/cleanup.js';
 import { test as apiTest } from '../../api/support/fixtures.js';
+import { toStorageState } from '../../support/auth.js';
+import type { Role } from '../../support/users.js';
 import { NON_ECO_CO2_RATING } from '../data/shop.js';
 import { AccountPage } from '../pages/account.page.js';
 import { AdminDashboardPage } from '../pages/admin-dashboard.page.js';
@@ -24,6 +26,10 @@ interface UiFixtures {
   loginPage: LoginPage;
   accountPage: AccountPage;
   adminDashboardPage: AdminDashboardPage;
+}
+
+interface SessionFixtures {
+  loggedInAs: Role | undefined;
 }
 
 interface SeedFixtures {
@@ -54,7 +60,15 @@ const uiTest = base.extend<UiFixtures>({
   },
 });
 
-export const test = mergeTests(apiTest, uiTest).extend<SeedFixtures>({
+export const test = mergeTests(apiTest, uiTest).extend<
+  SessionFixtures & SeedFixtures
+>({
+  loggedInAs: [undefined, { option: true }],
+  storageState: async ({ loggedInAs, tokens }, use) => {
+    await use(
+      loggedInAs ? toStorageState(await tokens.get(loggedInAs)) : undefined
+    );
+  },
   seedProduct: async ({ api, page, adminRequest }, use) => {
     const carts = new Cleanup(adminRequest);
     trackCarts(page, carts);

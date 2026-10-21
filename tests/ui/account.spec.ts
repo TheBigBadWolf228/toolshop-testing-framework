@@ -1,9 +1,8 @@
 import { test, expect } from './support/fixtures.js';
-import { authFile } from '../support/auth.js';
 import { ADMIN_DASHBOARD_RENDER_ERROR } from './data/known-bugs.js';
 
 test.describe('as customer', () => {
-  test.use({ storageState: authFile('customer') });
+  test.use({ loggedInAs: 'customer' });
 
   test('should open my account without logging in via the form', async ({
     accountPage,
@@ -16,7 +15,7 @@ test.describe('as customer', () => {
 
 test.describe('as admin', ADMIN_DASHBOARD_RENDER_ERROR, () => {
   test.describe.configure({ retries: 2 });
-  test.use({ storageState: authFile('admin') });
+  test.use({ loggedInAs: 'admin' });
 
   test('should open the admin dashboard without logging in via the form', async ({
     adminDashboardPage,

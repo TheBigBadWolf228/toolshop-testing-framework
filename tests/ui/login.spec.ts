@@ -1,6 +1,5 @@
 import { test, expect } from './support/fixtures.js';
 
-import { authFile } from '../support/auth.js';
 import { getCredentials } from '../support/users.js';
 import { INVALID_CREDENTIALS } from './data/shop.js';
 import { AccountPage } from './pages/account.page.js';
@@ -22,7 +21,7 @@ test('should login with valid credentials', async ({
 });
 
 test.describe('as customer', () => {
-  test.use({ storageState: authFile('customer') });
+  test.use({ loggedInAs: 'customer' });
 
   test('should log out', async ({ page, loginPage, accountPage }) => {
     await accountPage.open();
