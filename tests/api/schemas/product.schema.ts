@@ -16,6 +16,8 @@ export const ProductRequestSchema = z.object({
   is_location_offer: z.boolean(),
   is_rental: z.boolean(),
   co2_rating: Co2RatingSchema,
+  // Not in the spec; without it the product is out of stock for shoppers.
+  stock: z.number().int().optional(),
 });
 
 export const ProductSpecSchema = z.object({

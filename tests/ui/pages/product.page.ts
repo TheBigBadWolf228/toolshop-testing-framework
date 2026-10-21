@@ -2,7 +2,7 @@ import type { Locator, Page } from '@playwright/test';
 import { Header } from '../components/header.component.js';
 
 export class ProductPage {
-  static readonly path = /\/product\/[A-Z0-9]+$/;
+  static readonly path = /\/product\/[a-z0-9]+$/i;
 
   readonly header: Header;
   readonly name: Locator;
@@ -21,6 +21,10 @@ export class ProductPage {
       .getByRole('heading', { name: 'Related products' })
       .locator('..')
       .getByRole('heading', { level: 5 });
+  }
+
+  async open(id: string): Promise<void> {
+    await this.page.goto(`/product/${id}`);
   }
 
   async addToCart(): Promise<void> {

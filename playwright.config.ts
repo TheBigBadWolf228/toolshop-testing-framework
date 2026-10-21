@@ -4,9 +4,10 @@ import {
   devices,
   type PlaywrightTestOptions,
 } from '@playwright/test';
+import { API_HEADERS, API_URL, UI_URL } from './tests/support/env.js';
 
 const sharedUiUse: Partial<PlaywrightTestOptions> = {
-  baseURL: 'https://practicesoftwaretesting.com',
+  baseURL: UI_URL,
   testIdAttribute: 'data-test',
 };
 
@@ -18,10 +19,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 1 : 4,
   reporter: 'html',
   use: {
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
   },
 
   projects: [
@@ -30,11 +31,8 @@ export default defineConfig({
       testDir: './tests/setup',
       testMatch: /.*\.setup\.ts/,
       use: {
-        baseURL: 'https://api.practicesoftwaretesting.com',
-        extraHTTPHeaders: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
+        baseURL: API_URL,
+        extraHTTPHeaders: API_HEADERS,
       },
     },
     {
@@ -67,11 +65,8 @@ export default defineConfig({
     {
       name: 'API',
       use: {
-        baseURL: 'https://api.practicesoftwaretesting.com',
-        extraHTTPHeaders: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
+        baseURL: API_URL,
+        extraHTTPHeaders: API_HEADERS,
       },
       testDir: './tests/api',
       dependencies: ['setup'],

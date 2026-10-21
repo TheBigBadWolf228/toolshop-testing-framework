@@ -3,16 +3,18 @@ import {
   type APIRequestContext,
   type PlaywrightWorkerArgs,
 } from '@playwright/test';
-import { readToken } from '../../support/auth.js';
-import type { ApiCaller, ApiRole } from '../../support/users.js';
+import { API_HEADERS, API_URL } from '../../support/env.js';
+import type { ApiCaller } from '../../support/users.js';
 import { createApi, type Api } from '../clients/api.js';
 import { INVALID_TOKEN } from '../data/access.js';
 import { Cleanup } from './cleanup.js';
+import { Tokens } from './tokens.js';
 
-interface ApiFixtures {
+export interface ApiFixtures {
   cleanup: Cleanup;
   customerRequest: APIRequestContext;
   adminRequest: APIRequestContext;
+  anonRequest: APIRequestContext;
   invalidTokenRequest: APIRequestContext;
   api: Api;
   customerApi: Api;
@@ -21,51 +23,68 @@ interface ApiFixtures {
   apiAs: (caller: ApiCaller) => Api;
 }
 
-interface ApiOptions {
-  baseURL: string | undefined;
-  headers: Record<string, string> | undefined;
+export interface ApiWorkerFixtures {
+  tokens: Tokens;
 }
 
-async function createAuthedContext(
-  playwright: PlaywrightWorkerArgs['playwright'],
-  { baseURL, headers }: ApiOptions,
-  role: ApiRole
+type Playwright = PlaywrightWorkerArgs['playwright'];
+
+function newApiContext(
+  playwright: Playwright,
+  headers: Record<string, string> = {}
 ): Promise<APIRequestContext> {
-  const token = role === 'invalidToken' ? INVALID_TOKEN : await readToken(role);
   return playwright.request.newContext({
-    baseURL,
-    extraHTTPHeaders: { ...headers, Authorization: `Bearer ${token}` },
+    baseURL: API_URL,
+    extraHTTPHeaders: { ...API_HEADERS, ...headers },
   });
 }
 
-export const test = base.extend<ApiFixtures>({
-  customerRequest: async ({ playwright, baseURL, extraHTTPHeaders }, use) => {
-    const context = await createAuthedContext(
-      playwright,
-      { baseURL, headers: extraHTTPHeaders },
-      'customer'
-    );
+async function authHeader(
+  tokens: Tokens,
+  caller: ApiCaller
+): Promise<Record<string, string>> {
+  if (caller === 'anon') {
+    return {};
+  }
+  const token =
+    caller === 'invalidToken' ? INVALID_TOKEN : await tokens.get(caller);
+  return { Authorization: `Bearer ${token}` };
+}
+
+async function createApiContext(
+  playwright: Playwright,
+  tokens: Tokens,
+  caller: ApiCaller
+): Promise<APIRequestContext> {
+  return newApiContext(playwright, await authHeader(tokens, caller));
+}
+
+export const test = base.extend<ApiFixtures, ApiWorkerFixtures>({
+  tokens: [
+    async ({ playwright }, use) => {
+      const context = await newApiContext(playwright);
+      await use(new Tokens(context));
+      await context.dispose();
+    },
+    { scope: 'worker' },
+  ],
+  customerRequest: async ({ playwright, tokens }, use) => {
+    const context = await createApiContext(playwright, tokens, 'customer');
     await use(context);
     await context.dispose();
   },
-  adminRequest: async ({ playwright, baseURL, extraHTTPHeaders }, use) => {
-    const context = await createAuthedContext(
-      playwright,
-      { baseURL, headers: extraHTTPHeaders },
-      'admin'
-    );
+  adminRequest: async ({ playwright, tokens }, use) => {
+    const context = await createApiContext(playwright, tokens, 'admin');
     await use(context);
     await context.dispose();
   },
-  invalidTokenRequest: async (
-    { playwright, baseURL, extraHTTPHeaders },
-    use
-  ) => {
-    const context = await createAuthedContext(
-      playwright,
-      { baseURL, headers: extraHTTPHeaders },
-      'invalidToken'
-    );
+  anonRequest: async ({ playwright, tokens }, use) => {
+    const context = await createApiContext(playwright, tokens, 'anon');
+    await use(context);
+    await context.dispose();
+  },
+  invalidTokenRequest: async ({ playwright, tokens }, use) => {
+    const context = await createApiContext(playwright, tokens, 'invalidToken');
     await use(context);
     await context.dispose();
   },
@@ -80,8 +99,8 @@ export const test = base.extend<ApiFixtures>({
   customerApi: async ({ customerRequest, cleanup }, use) => {
     await use(createApi(customerRequest, cleanup));
   },
-  anonApi: async ({ request, cleanup }, use) => {
-    await use(createApi(request, cleanup));
+  anonApi: async ({ anonRequest, cleanup }, use) => {
+    await use(createApi(anonRequest, cleanup));
   },
   invalidTokenApi: async ({ invalidTokenRequest, cleanup }, use) => {
     await use(createApi(invalidTokenRequest, cleanup));
