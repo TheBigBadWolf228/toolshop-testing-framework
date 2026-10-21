@@ -1,4 +1,5 @@
-import { test as base } from '@playwright/test';
+import { test as base, mergeTests } from '@playwright/test';
+import { test as apiTest } from '../../api/support/fixtures.js';
 import { AccountPage } from '../pages/account.page.js';
 import { AdminDashboardPage } from '../pages/admin-dashboard.page.js';
 import { CartPage } from '../pages/cart.page.js';
@@ -17,7 +18,7 @@ interface UiFixtures {
   adminDashboardPage: AdminDashboardPage;
 }
 
-export const test = base.extend<UiFixtures>({
+const uiTest = base.extend<UiFixtures>({
   homePage: async ({ page }, use) => {
     await use(new HomePage(page));
   },
@@ -40,5 +41,7 @@ export const test = base.extend<UiFixtures>({
     await use(new AdminDashboardPage(page));
   },
 });
+
+export const test = mergeTests(apiTest, uiTest);
 
 export { expect } from '@playwright/test';

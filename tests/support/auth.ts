@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { UI_URL } from './env.js';
 import type { Role } from './users.js';
 
 export function authFile(role: Role): string {
@@ -9,7 +10,6 @@ export function authFile(role: Role): string {
   );
 }
 
-export const UI_ORIGIN = 'https://practicesoftwaretesting.com';
 export const TOKEN_KEY = 'auth-token';
 
 export interface StorageState {
@@ -24,7 +24,7 @@ export function toStorageState(token: string): StorageState {
   return {
     cookies: [],
     origins: [
-      { origin: UI_ORIGIN, localStorage: [{ name: TOKEN_KEY, value: token }] },
+      { origin: UI_URL, localStorage: [{ name: TOKEN_KEY, value: token }] },
     ],
   };
 }
@@ -33,7 +33,7 @@ export async function readToken(role: Role): Promise<string> {
   const file = authFile(role);
   const state = JSON.parse(await readFile(file, 'utf-8')) as StorageState;
   const token = state.origins
-    .find((o) => o.origin === UI_ORIGIN)
+    .find((o) => o.origin === UI_URL)
     ?.localStorage.find((item) => item.name === TOKEN_KEY)?.value;
 
   if (!token) {
