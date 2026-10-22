@@ -71,9 +71,17 @@ export const ProductListItemSchema = ProductBaseSchema.extend({
 
 export const ProductPageSchema = paginated(ProductListItemSchema);
 
+export const ProductSearchItemSchema = ProductBaseSchema.extend({
+  brand: BrandRefSchema,
+  category: CategoryRefSchema.pick({ id: true, name: true }),
+});
+
+export const ProductSearchPageSchema = paginated(ProductSearchItemSchema);
+
 export type Co2Rating = z.infer<typeof Co2RatingSchema>;
 export type ProductRequest = z.infer<typeof ProductRequestSchema>;
 export type Product = z.infer<typeof ProductSchema>;
 export type CreatedProduct = z.infer<typeof CreatedProductSchema>;
 export type ProductListItem = z.infer<typeof ProductListItemSchema>;
 export type ProductPage = z.infer<typeof ProductPageSchema>;
+export type ProductSearchPage = z.infer<typeof ProductSearchPageSchema>;

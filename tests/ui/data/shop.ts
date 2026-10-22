@@ -38,6 +38,25 @@ export const CART = {
   bothProductsTotal: '$23.32',
 } as const;
 
+export const CHECKOUT = {
+  product: { name: 'Combination Pliers', totalText: '$14.15' },
+  stock: 1_000_000,
+  address: {
+    country: 'Netherlands (the)',
+    postalCode: '1122AB',
+    houseNumber: '37',
+  },
+  filledAddress: {
+    street: 'Kanhaistraat',
+    city: 'Scherpenzeel',
+    state: 'Groningen',
+  },
+  paymentMethod: 'Cash on Delivery',
+  paymentSuccess: 'Payment was successful',
+  confirmation: 'Thanks for your order!',
+  invoiceNumberPattern: /INV-\d+/,
+} as const;
+
 export const INVALID_CREDENTIALS = {
   email: 'invalid@example.com',
   password: 'qwerty123',
