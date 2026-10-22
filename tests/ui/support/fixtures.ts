@@ -23,6 +23,7 @@ import { HomePage } from '../pages/home.page.js';
 import { InvoicesPage } from '../pages/invoices.page.js';
 import { LoginPage } from '../pages/login.page.js';
 import { ProductPage } from '../pages/product.page.js';
+import { ProfilePage } from '../pages/profile.page.js';
 import { RegisterPage } from '../pages/register.page.js';
 import { trackCarts } from './track-carts.js';
 
@@ -36,6 +37,7 @@ interface UiFixtures {
   registerPage: RegisterPage;
   accountPage: AccountPage;
   favoritesPage: FavoritesPage;
+  profilePage: ProfilePage;
   invoicesPage: InvoicesPage;
   adminDashboardPage: AdminDashboardPage;
 }
@@ -83,6 +85,9 @@ const uiTest = base.extend<UiFixtures>({
   },
   favoritesPage: async ({ page }, use) => {
     await use(new FavoritesPage(page));
+  },
+  profilePage: async ({ page }, use) => {
+    await use(new ProfilePage(page));
   },
   invoicesPage: async ({ page }, use) => {
     await use(new InvoicesPage(page));
