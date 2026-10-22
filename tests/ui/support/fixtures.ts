@@ -13,7 +13,9 @@ import { AccountPage } from '../pages/account.page.js';
 import { AdminDashboardPage } from '../pages/admin-dashboard.page.js';
 import { CartPage } from '../pages/cart.page.js';
 import { CategoryPage } from '../pages/category.page.js';
+import { CheckoutPage } from '../pages/checkout.page.js';
 import { HomePage } from '../pages/home.page.js';
+import { InvoicesPage } from '../pages/invoices.page.js';
 import { LoginPage } from '../pages/login.page.js';
 import { ProductPage } from '../pages/product.page.js';
 import { trackCarts } from './track-carts.js';
@@ -23,8 +25,10 @@ interface UiFixtures {
   categoryPage: CategoryPage;
   productPage: ProductPage;
   cartPage: CartPage;
+  checkoutPage: CheckoutPage;
   loginPage: LoginPage;
   accountPage: AccountPage;
+  invoicesPage: InvoicesPage;
   adminDashboardPage: AdminDashboardPage;
 }
 
@@ -33,6 +37,7 @@ interface SessionFixtures {
 }
 
 interface SeedFixtures {
+  trackedCarts: void;
   seedProduct: (overrides?: Partial<ProductRequest>) => Promise<CreatedProduct>;
 }
 
@@ -49,11 +54,17 @@ const uiTest = base.extend<UiFixtures>({
   cartPage: async ({ page }, use) => {
     await use(new CartPage(page));
   },
+  checkoutPage: async ({ page }, use) => {
+    await use(new CheckoutPage(page));
+  },
   loginPage: async ({ page }, use) => {
     await use(new LoginPage(page));
   },
   accountPage: async ({ page }, use) => {
     await use(new AccountPage(page));
+  },
+  invoicesPage: async ({ page }, use) => {
+    await use(new InvoicesPage(page));
   },
   adminDashboardPage: async ({ page }, use) => {
     await use(new AdminDashboardPage(page));
@@ -69,13 +80,20 @@ export const test = mergeTests(apiTest, uiTest).extend<
       loggedInAs ? toStorageState(await tokens.get(loggedInAs)) : undefined
     );
   },
-  seedProduct: async ({ api, page, adminRequest }, use) => {
-    const carts = new Cleanup(adminRequest);
-    trackCarts(page, carts);
+  // carts are deleted before the products in them.
+  trackedCarts: [
+    async ({ page, adminRequest, cleanup: _ }, use) => {
+      const carts = new Cleanup(adminRequest);
+      trackCarts(page, carts);
+      await use();
+      await carts.run();
+    },
+    { auto: true },
+  ],
+  seedProduct: async ({ api }, use) => {
     await use((overrides) =>
       seedProduct(api, { co2_rating: NON_ECO_CO2_RATING, ...overrides })
     );
-    await carts.run();
   },
 });
 

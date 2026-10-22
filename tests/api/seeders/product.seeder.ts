@@ -6,6 +6,7 @@ import { buildCategory } from '../factories/category.factory.js';
 import { buildProduct } from '../factories/product.factory.js';
 import type {
   CreatedProduct,
+  Product,
   ProductRequest,
 } from '../schemas/product.schema.js';
 
@@ -25,4 +26,25 @@ export async function seedProduct(
   return api.products.create(
     buildProduct(refs, { stock: SEEDED_PRODUCT_STOCK, ...overrides })
   );
+}
+
+export async function restockProduct(
+  api: Api,
+  name: string,
+  stock: number
+): Promise<Product> {
+  const { data } = await api.products.search(name);
+  const match = data.find((product) => product.name === name);
+  if (!match) {
+    throw new Error(`Product "${name}" not found by search.`);
+  }
+  await api.products.setStock(match.id, stock);
+  const product = await api.products.get(match.id);
+  // Others keep buying it, so expecting most of the stock, not exact number.
+  if (typeof product.in_stock !== 'number' || product.in_stock < stock / 2) {
+    throw new Error(
+      `Restock of "${name}" to ${stock} was ignored: in_stock is ${product.in_stock}.`
+    );
+  }
+  return product;
 }
