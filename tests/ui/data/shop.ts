@@ -61,6 +61,14 @@ export const CHECKOUT = {
 
 export const FAVORITE_PRODUCT = 'Combination Pliers';
 
+export const INVOICE_COLUMNS = [
+  'Invoice Number',
+  'Billing Address',
+  'Invoice Date',
+  'Total',
+  '',
+] as const;
+
 export const INVALID_CREDENTIALS = {
   email: 'invalid@example.com',
   password: 'qwerty123',
