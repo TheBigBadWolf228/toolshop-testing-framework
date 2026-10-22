@@ -1,5 +1,6 @@
 import { test, expect } from './support/fixtures.js';
 import { ADMIN_DASHBOARD_RENDER_ERROR } from './data/known-bugs.js';
+import { INVOICE_COLUMNS } from './data/shop.js';
 
 test.describe('as customer', () => {
   test.use({ loggedInAs: 'customer' });
@@ -10,6 +11,19 @@ test.describe('as customer', () => {
     await accountPage.open();
 
     await expect(accountPage.heading).toBeVisible();
+  });
+});
+
+test.describe('as a new customer', () => {
+  test('should show an empty invoices list', async ({
+    freshCustomer: _,
+    invoicesPage,
+  }) => {
+    await invoicesPage.open();
+
+    await expect(invoicesPage.heading).toBeVisible();
+    await expect(invoicesPage.columnHeaders).toHaveText([...INVOICE_COLUMNS]);
+    await expect(invoicesPage.rows).toHaveCount(0);
   });
 });
 

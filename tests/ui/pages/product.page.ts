@@ -9,6 +9,9 @@ export class ProductPage {
   readonly price: Locator;
   readonly description: Locator;
   readonly addToCartButton: Locator;
+  readonly addToFavoritesButton: Locator;
+  readonly favoriteAddedAlert: Locator;
+  readonly favoriteDuplicateAlert: Locator;
   readonly relatedNames: Locator;
 
   constructor(private readonly page: Page) {
@@ -17,6 +20,15 @@ export class ProductPage {
     this.price = page.getByTestId('unit-price');
     this.description = page.getByTestId('product-description');
     this.addToCartButton = page.getByTestId('add-to-cart');
+    this.addToFavoritesButton = page.getByRole('button', {
+      name: 'Add to favourites',
+    });
+    this.favoriteAddedAlert = page
+      .getByRole('alert')
+      .filter({ hasText: 'Product added to your favorites list.' });
+    this.favoriteDuplicateAlert = page
+      .getByRole('alert')
+      .filter({ hasText: 'Product already in your favorites list.' });
     this.relatedNames = page
       .getByRole('heading', { name: 'Related products' })
       .locator('..')
@@ -29,6 +41,10 @@ export class ProductPage {
 
   async addToCart(): Promise<void> {
     await this.addToCartButton.click();
+  }
+
+  async addToFavorites(): Promise<void> {
+    await this.addToFavoritesButton.click();
   }
 
   async openRelated(name: string): Promise<void> {

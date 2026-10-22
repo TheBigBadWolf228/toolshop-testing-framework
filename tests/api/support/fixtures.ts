@@ -29,7 +29,7 @@ export interface ApiWorkerFixtures {
 
 type Playwright = PlaywrightWorkerArgs['playwright'];
 
-function newApiContext(
+export function newApiContext(
   playwright: Playwright,
   headers: Record<string, string> = {}
 ): Promise<APIRequestContext> {
