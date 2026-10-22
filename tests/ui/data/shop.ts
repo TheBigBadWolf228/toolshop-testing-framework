@@ -59,6 +59,8 @@ export const CHECKOUT = {
   invoiceNumberPattern: /INV-\d+/,
 } as const;
 
+export const FAVORITE_PRODUCT = 'Combination Pliers';
+
 export const INVALID_CREDENTIALS = {
   email: 'invalid@example.com',
   password: 'qwerty123',
