@@ -1,8 +1,12 @@
 import { test, expect } from './support/fixtures.js';
 import { restockProduct } from '../api/seeders/product.seeder.js';
-import { CHECKOUT } from './data/shop.js';
+import {
+  CHECKOUT,
+  LOOKUP_ADDRESS,
+  LOOKUP_ADDRESS_RESULT,
+} from './data/shop.js';
 
-const { product, address, filledAddress } = CHECKOUT;
+const { product } = CHECKOUT;
 
 test.use({ loggedInAs: 'customer' });
 
@@ -28,10 +32,16 @@ test('should place an order and show its invoice in the account', async ({
   await expect(checkoutPage.signedInMessage).toBeVisible();
   await checkoutPage.proceed();
 
-  await checkoutPage.fillAddress(address);
-  await expect(checkoutPage.street).toHaveValue(filledAddress.street);
-  await expect(checkoutPage.city).toHaveValue(filledAddress.city);
-  await expect(checkoutPage.state).toHaveValue(filledAddress.state);
+  await checkoutPage.address.fill(LOOKUP_ADDRESS);
+  await expect(checkoutPage.address.street).toHaveValue(
+    LOOKUP_ADDRESS_RESULT.street
+  );
+  await expect(checkoutPage.address.city).toHaveValue(
+    LOOKUP_ADDRESS_RESULT.city
+  );
+  await expect(checkoutPage.address.state).toHaveValue(
+    LOOKUP_ADDRESS_RESULT.state
+  );
   await checkoutPage.proceed();
 
   await checkoutPage.choosePayment(CHECKOUT.paymentMethod);
@@ -51,5 +61,5 @@ test('should place an order and show its invoice in the account', async ({
   const row = invoicesPage.row(invoiceNumber);
   await expect(row).toBeVisible();
   await expect(row).toContainText(product.totalText);
-  await expect(row).toContainText(filledAddress.street);
+  await expect(row).toContainText(LOOKUP_ADDRESS_RESULT.street);
 });

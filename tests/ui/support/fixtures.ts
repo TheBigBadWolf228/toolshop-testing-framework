@@ -1,8 +1,10 @@
 import { test as base, mergeTests } from '@playwright/test';
+import { buildUser } from '../../api/factories/user.factory.js';
 import type {
   CreatedProduct,
   ProductRequest,
 } from '../../api/schemas/product.schema.js';
+import type { NewUser } from '../../api/schemas/user.schema.js';
 import { seedProduct } from '../../api/seeders/product.seeder.js';
 import { Cleanup } from '../../api/support/cleanup.js';
 import { test as apiTest } from '../../api/support/fixtures.js';
@@ -18,6 +20,7 @@ import { HomePage } from '../pages/home.page.js';
 import { InvoicesPage } from '../pages/invoices.page.js';
 import { LoginPage } from '../pages/login.page.js';
 import { ProductPage } from '../pages/product.page.js';
+import { RegisterPage } from '../pages/register.page.js';
 import { trackCarts } from './track-carts.js';
 
 interface UiFixtures {
@@ -27,6 +30,7 @@ interface UiFixtures {
   cartPage: CartPage;
   checkoutPage: CheckoutPage;
   loginPage: LoginPage;
+  registerPage: RegisterPage;
   accountPage: AccountPage;
   invoicesPage: InvoicesPage;
   adminDashboardPage: AdminDashboardPage;
@@ -39,6 +43,7 @@ interface SessionFixtures {
 interface SeedFixtures {
   trackedCarts: void;
   seedProduct: (overrides?: Partial<ProductRequest>) => Promise<CreatedProduct>;
+  newUser: NewUser;
 }
 
 const uiTest = base.extend<UiFixtures>({
@@ -59,6 +64,9 @@ const uiTest = base.extend<UiFixtures>({
   },
   loginPage: async ({ page }, use) => {
     await use(new LoginPage(page));
+  },
+  registerPage: async ({ page }, use) => {
+    await use(new RegisterPage(page));
   },
   accountPage: async ({ page }, use) => {
     await use(new AccountPage(page));
@@ -94,6 +102,16 @@ export const test = mergeTests(apiTest, uiTest).extend<
     await use((overrides) =>
       seedProduct(api, { co2_rating: NON_ECO_CO2_RATING, ...overrides })
     );
+  },
+  newUser: async ({ api, cleanup }, use) => {
+    const user = buildUser();
+    cleanup.add(async () => {
+      const { data } = await api.users.search(user.email);
+      for (const { id } of data.filter(({ email }) => email === user.email)) {
+        await api.users.delete(id);
+      }
+    });
+    await use(user);
   },
 });
 
