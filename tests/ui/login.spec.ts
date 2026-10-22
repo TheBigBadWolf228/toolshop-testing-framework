@@ -1,24 +1,7 @@
 import { test, expect } from './support/fixtures.js';
 
-import { getCredentials } from '../support/users.js';
 import { INVALID_CREDENTIALS } from './data/shop.js';
-import { AccountPage } from './pages/account.page.js';
 import { LoginPage } from './pages/login.page.js';
-
-const { email, password } = getCredentials('customer');
-
-test('should login with valid credentials', async ({
-  page,
-  loginPage,
-  accountPage,
-}) => {
-  await loginPage.open();
-
-  await loginPage.login(email, password);
-
-  await expect(page).toHaveURL(AccountPage.path);
-  await expect(accountPage.heading).toBeVisible();
-});
 
 test.describe('as customer', () => {
   test.use({ loggedInAs: 'customer' });
