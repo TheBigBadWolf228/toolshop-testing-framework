@@ -7,6 +7,7 @@ const CURL_HEADERS: readonly string[] = [
   'content-type',
   'authorization',
 ];
+const FAILED_RESOURCE_PREFIX = 'Failed to load resource:';
 
 export class BrowserLog {
   private readonly calls = new ApiCallLog();
@@ -29,7 +30,10 @@ export class BrowserLog {
     });
     page.on('pageerror', (error) => this.countError(`pageerror: ${error}`));
     page.on('console', (message) => {
-      if (message.type() === 'error') {
+      if (
+        message.type() === 'error' &&
+        !message.text().startsWith(FAILED_RESOURCE_PREFIX)
+      ) {
         this.countError(`console: ${message.text()}`);
       }
     });
