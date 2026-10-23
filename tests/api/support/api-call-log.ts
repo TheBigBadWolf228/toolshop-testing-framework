@@ -12,6 +12,7 @@ const SECRET_KEYS: readonly string[] = ['password', 'access_token', 'token'];
 const MAX_BODY_CHARS = 2_000;
 const REDACTED = '<redacted>';
 const TOKEN_PLACEHOLDER = 'Bearer $TOKEN';
+const FIRST_FAILED_STATUS = 400;
 const RECORDED_METHODS: readonly string[] = [
   'get',
   'post',
@@ -124,9 +125,11 @@ export function toCurl(call: ApiCall): string {
 
 function formatCall(call: ApiCall, number: number): string {
   const { pathname, search } = new URL(call.url);
-  const sections = [
-    `### ${number}. ${call.method} ${pathname}${search} → ${call.status} (${call.durationMs} ms)`,
-  ];
+  const summary = `${number}. ${call.method} ${pathname}${search} → ${call.status} (${call.durationMs} ms)`;
+  if (call.status < FIRST_FAILED_STATUS) {
+    return summary;
+  }
+  const sections = [`### ${summary}`];
   if (call.requestBody !== undefined) {
     sections.push(`Request:\n${bodyBlock(call.requestBody)}`);
   }
