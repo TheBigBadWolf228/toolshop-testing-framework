@@ -157,7 +157,7 @@ export const test = mergeTests(apiTest, uiTest).extend<
   },
   // Favorites lock the user (409) and only their owner can delete them
   freshCustomer: async (
-    { api, anonApi, cleanup, context, playwright },
+    { api, anonApi, apiCallLog, cleanup, context, playwright },
     use
   ) => {
     const user = await seedUser(api);
@@ -165,9 +165,11 @@ export const test = mergeTests(apiTest, uiTest).extend<
       email: user.email,
       password: user.password,
     });
-    const request = await newApiContext(playwright, {
-      Authorization: `Bearer ${access_token}`,
-    });
+    const request = await newApiContext(
+      playwright,
+      { Authorization: `Bearer ${access_token}` },
+      apiCallLog
+    );
     const userApi = createApi(request, cleanup);
     await context.addInitScript(
       ({ key, token }) => localStorage.setItem(key, token),

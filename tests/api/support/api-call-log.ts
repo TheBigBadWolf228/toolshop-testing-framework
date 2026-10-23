@@ -1,7 +1,25 @@
+import type { APIRequestContext, APIResponse } from '@playwright/test';
+
+type FetchTarget = Parameters<APIRequestContext['fetch']>[0];
+
+interface RequestOptions {
+  data?: unknown;
+  headers?: Record<string, string>;
+  method?: string;
+}
+
 const SECRET_KEYS: readonly string[] = ['password', 'access_token', 'token'];
 const MAX_BODY_CHARS = 2_000;
 const REDACTED = '<redacted>';
 const TOKEN_PLACEHOLDER = 'Bearer $TOKEN';
+const RECORDED_METHODS: readonly string[] = [
+  'get',
+  'post',
+  'put',
+  'patch',
+  'delete',
+  'head',
+];
 
 export interface ApiCall {
   method: string;
@@ -29,6 +47,60 @@ export class ApiCallLog {
       .map((call, index) => formatCall(call, index + 1))
       .join('\n\n');
   }
+}
+
+export function recordCalls(
+  request: APIRequestContext,
+  log: ApiCallLog,
+  headers: Record<string, string>
+): APIRequestContext {
+  const record = async (
+    method: string,
+    options: RequestOptions,
+    send: () => Promise<APIResponse>
+  ): Promise<APIResponse> => {
+    const started = Date.now();
+    const response = await send();
+    const durationMs = Date.now() - started;
+    log.record({
+      method,
+      url: response.url(),
+      requestHeaders: { ...headers, ...options.headers },
+      requestBody: options.data,
+      status: response.status(),
+      responseBody: await response.text(),
+      durationMs,
+    });
+    return response;
+  };
+
+  return new Proxy(request, {
+    get(target, property) {
+      const value = Reflect.get(target, property);
+      if (typeof value !== 'function') {
+        return value;
+      }
+      const call = value.bind(target);
+      if (property === 'fetch') {
+        return (resource: FetchTarget, options: RequestOptions = {}) =>
+          record(fetchMethod(resource, options), options, () =>
+            call(resource, options)
+          );
+      }
+      if (typeof property === 'string' && RECORDED_METHODS.includes(property)) {
+        return (url: string, options: RequestOptions = {}) =>
+          record(property.toUpperCase(), options, () => call(url, options));
+      }
+      return call;
+    },
+  });
+}
+
+function fetchMethod(resource: FetchTarget, options: RequestOptions): string {
+  const method =
+    options.method ??
+    (typeof resource === 'string' ? 'GET' : resource.method());
+  return method.toUpperCase();
 }
 
 export function toCurl(call: ApiCall): string {

@@ -7,10 +7,12 @@ import { API_HEADERS, API_URL } from '../../support/env.js';
 import type { ApiCaller } from '../../support/users.js';
 import { createApi, type Api } from '../clients/api.js';
 import { INVALID_TOKEN } from '../data/access.js';
+import { ApiCallLog, recordCalls } from './api-call-log.js';
 import { Cleanup } from './cleanup.js';
 import { Tokens } from './tokens.js';
 
 export interface ApiFixtures {
+  apiCallLog: ApiCallLog;
   cleanup: Cleanup;
   customerRequest: APIRequestContext;
   adminRequest: APIRequestContext;
@@ -29,14 +31,17 @@ export interface ApiWorkerFixtures {
 
 type Playwright = PlaywrightWorkerArgs['playwright'];
 
-export function newApiContext(
+export async function newApiContext(
   playwright: Playwright,
-  headers: Record<string, string> = {}
+  headers: Record<string, string> = {},
+  log?: ApiCallLog
 ): Promise<APIRequestContext> {
-  return playwright.request.newContext({
+  const extraHTTPHeaders = { ...API_HEADERS, ...headers };
+  const context = await playwright.request.newContext({
     baseURL: API_URL,
-    extraHTTPHeaders: { ...API_HEADERS, ...headers },
+    extraHTTPHeaders,
   });
+  return log ? recordCalls(context, log, extraHTTPHeaders) : context;
 }
 
 async function authHeader(
@@ -54,9 +59,10 @@ async function authHeader(
 async function createApiContext(
   playwright: Playwright,
   tokens: Tokens,
-  caller: ApiCaller
+  caller: ApiCaller,
+  log: ApiCallLog
 ): Promise<APIRequestContext> {
-  return newApiContext(playwright, await authHeader(tokens, caller));
+  return newApiContext(playwright, await authHeader(tokens, caller), log);
 }
 
 export const test = base.extend<ApiFixtures, ApiWorkerFixtures>({
@@ -68,23 +74,53 @@ export const test = base.extend<ApiFixtures, ApiWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  customerRequest: async ({ playwright, tokens }, use) => {
-    const context = await createApiContext(playwright, tokens, 'customer');
+  apiCallLog: async ({}, use, testInfo) => {
+    const log = new ApiCallLog();
+    await use(log);
+    if (testInfo.status !== testInfo.expectedStatus && !log.isEmpty) {
+      await testInfo.attach('api-calls.md', {
+        body: log.toMarkdown(),
+        contentType: 'text/markdown',
+      });
+    }
+  },
+  customerRequest: async ({ playwright, tokens, apiCallLog }, use) => {
+    const context = await createApiContext(
+      playwright,
+      tokens,
+      'customer',
+      apiCallLog
+    );
     await use(context);
     await context.dispose();
   },
-  adminRequest: async ({ playwright, tokens }, use) => {
-    const context = await createApiContext(playwright, tokens, 'admin');
+  adminRequest: async ({ playwright, tokens, apiCallLog }, use) => {
+    const context = await createApiContext(
+      playwright,
+      tokens,
+      'admin',
+      apiCallLog
+    );
     await use(context);
     await context.dispose();
   },
-  anonRequest: async ({ playwright, tokens }, use) => {
-    const context = await createApiContext(playwright, tokens, 'anon');
+  anonRequest: async ({ playwright, tokens, apiCallLog }, use) => {
+    const context = await createApiContext(
+      playwright,
+      tokens,
+      'anon',
+      apiCallLog
+    );
     await use(context);
     await context.dispose();
   },
-  invalidTokenRequest: async ({ playwright, tokens }, use) => {
-    const context = await createApiContext(playwright, tokens, 'invalidToken');
+  invalidTokenRequest: async ({ playwright, tokens, apiCallLog }, use) => {
+    const context = await createApiContext(
+      playwright,
+      tokens,
+      'invalidToken',
+      apiCallLog
+    );
     await use(context);
     await context.dispose();
   },
