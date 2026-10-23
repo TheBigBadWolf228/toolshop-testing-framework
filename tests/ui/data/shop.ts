@@ -73,3 +73,26 @@ export const INVALID_CREDENTIALS = {
   email: 'invalid@example.com',
   password: 'qwerty123',
 } as const;
+
+export const CONTACT = {
+  firstName: 'Ada',
+  lastName: 'Lovelace',
+  subject: { label: 'Warranty', value: 'warranty' },
+  message:
+    'My drill stopped working after two weeks. Is this covered by the warranty?',
+  invalidEmail: 'not-an-email',
+  tooShortMessage: 'x'.repeat(49),
+  status: 'NEW',
+} as const;
+
+export const CONTACT_ERRORS = {
+  required: [
+    'First name is required',
+    'Last name is required',
+    'Email is required',
+    'Subject is required',
+    'Message is required',
+  ],
+  invalidEmail: 'Email format is invalid',
+  messageTooShort: 'Message must be minimal 50 characters',
+} as const;
