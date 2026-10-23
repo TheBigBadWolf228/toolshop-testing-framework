@@ -1,6 +1,5 @@
 import type { APIRequestContext } from '@playwright/test';
 import { getCredentials, type Role } from '../../support/users.js';
-import { TOKEN_REFRESH_MARGIN_MS } from '../data/access.js';
 import {
   TokenResponseSchema,
   type TokenResponse,
@@ -8,6 +7,7 @@ import {
 import { expectStatus } from './expect-status.js';
 
 const LOGIN = '/users/login';
+const TOKEN_REFRESH_MARGIN_MS = 60_000;
 
 export async function login(
   request: APIRequestContext,
