@@ -16,14 +16,18 @@ function topLevelCategory(id: string, data: CategoryRequest): Category {
 }
 
 test.describe('categories CRUD', () => {
-  test('should create a category when valid data is sent', async ({ api }) => {
-    const data = buildCategory();
+  test(
+    'should create a category when valid data is sent',
+    { tag: '@smoke' },
+    async ({ api }) => {
+      const data = buildCategory();
 
-    const category = await api.categories.create(data);
+      const category = await api.categories.create(data);
 
-    expect(category).toMatchObject(data);
-    expect(category.id).toBeTruthy();
-  });
+      expect(category).toMatchObject(data);
+      expect(category.id).toBeTruthy();
+    }
+  );
 
   test('should return the category when it is requested by id', async ({
     api,

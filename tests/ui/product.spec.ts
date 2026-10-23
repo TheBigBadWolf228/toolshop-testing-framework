@@ -2,22 +2,22 @@ import { test, expect } from './support/fixtures.js';
 import { PRODUCT_DETAILS } from './data/shop.js';
 import { ProductPage } from './pages/product.page.js';
 
-test('should show the details of the product opened from the list', async ({
-  page,
-  homePage,
-  productPage,
-}) => {
-  await homePage.open();
-  await homePage.search(PRODUCT_DETAILS.name);
-  await homePage.grid.openProduct(PRODUCT_DETAILS.name);
+test(
+  'should show the details of the product opened from the list',
+  { tag: '@smoke' },
+  async ({ page, homePage, productPage }) => {
+    await homePage.open();
+    await homePage.search(PRODUCT_DETAILS.name);
+    await homePage.grid.openProduct(PRODUCT_DETAILS.name);
 
-  await expect(page).toHaveURL(ProductPage.path);
-  await expect(productPage.name).toHaveText(PRODUCT_DETAILS.name);
-  await expect(productPage.price).toHaveText(PRODUCT_DETAILS.price);
-  await expect(productPage.description).toContainText(
-    PRODUCT_DETAILS.descriptionStart
-  );
-});
+    await expect(page).toHaveURL(ProductPage.path);
+    await expect(productPage.name).toHaveText(PRODUCT_DETAILS.name);
+    await expect(productPage.price).toHaveText(PRODUCT_DETAILS.price);
+    await expect(productPage.description).toContainText(
+      PRODUCT_DETAILS.descriptionStart
+    );
+  }
+);
 
 test('should show the other products of the category as related', async ({
   seedProduct,

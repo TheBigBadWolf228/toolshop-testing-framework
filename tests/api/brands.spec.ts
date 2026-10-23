@@ -15,14 +15,18 @@ import { expectDenied } from './support/expect-denied.js';
 import { expectSchema } from './support/expect-schema.js';
 
 test.describe('brands CRUD', () => {
-  test('should create a brand when valid data is sent', async ({ api }) => {
-    const data = buildBrand();
+  test(
+    'should create a brand when valid data is sent',
+    { tag: '@smoke' },
+    async ({ api }) => {
+      const data = buildBrand();
 
-    const brand = await api.brands.create(data);
+      const brand = await api.brands.create(data);
 
-    expect(brand).toMatchObject(data);
-    expect(brand.id).toBeTruthy();
-  });
+      expect(brand).toMatchObject(data);
+      expect(brand.id).toBeTruthy();
+    }
+  );
 
   test('should return the brand when it is requested by id', async ({
     api,

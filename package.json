@@ -8,6 +8,7 @@
     "test:ui": "playwright test --project=\"UI Chrome\" --project=\"UI Firefox\" --project=\"UI Safari\"",
     "test:api": "playwright test --project=\"API\"",
     "test:all": "playwright test",
+    "test:smoke": "playwright test --grep @smoke --project=\"UI Chrome\" --project=\"API\"",
     "typecheck": "tsc --noEmit",
     "format:check": "prettier --check ."
   },
