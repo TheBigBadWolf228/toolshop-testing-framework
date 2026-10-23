@@ -18,10 +18,12 @@ import { AdminDashboardPage } from '../pages/admin-dashboard.page.js';
 import { CartPage } from '../pages/cart.page.js';
 import { CategoryPage } from '../pages/category.page.js';
 import { CheckoutPage } from '../pages/checkout.page.js';
+import { ContactPage } from '../pages/contact.page.js';
 import { FavoritesPage } from '../pages/favorites.page.js';
 import { HomePage } from '../pages/home.page.js';
 import { InvoicesPage } from '../pages/invoices.page.js';
 import { LoginPage } from '../pages/login.page.js';
+import { MessagesPage } from '../pages/messages.page.js';
 import { ProductPage } from '../pages/product.page.js';
 import { ProfilePage } from '../pages/profile.page.js';
 import { RegisterPage } from '../pages/register.page.js';
@@ -39,6 +41,8 @@ interface UiFixtures {
   favoritesPage: FavoritesPage;
   profilePage: ProfilePage;
   invoicesPage: InvoicesPage;
+  contactPage: ContactPage;
+  messagesPage: MessagesPage;
   adminDashboardPage: AdminDashboardPage;
 }
 
@@ -91,6 +95,12 @@ const uiTest = base.extend<UiFixtures>({
   },
   invoicesPage: async ({ page }, use) => {
     await use(new InvoicesPage(page));
+  },
+  contactPage: async ({ page }, use) => {
+    await use(new ContactPage(page));
+  },
+  messagesPage: async ({ page }, use) => {
+    await use(new MessagesPage(page));
   },
   adminDashboardPage: async ({ page }, use) => {
     await use(new AdminDashboardPage(page));
