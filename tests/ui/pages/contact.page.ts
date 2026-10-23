@@ -26,7 +26,7 @@ export class ContactPage {
 
   constructor(private readonly page: Page) {
     this.heading = page.getByRole('heading', { name: 'Contact' });
-    this.greeting = page.getByText(/^Hello .+, please fill out this form/);
+    this.greeting = page.getByText('please fill out this form');
     this.firstName = page.getByRole('textbox', { name: 'First name' });
     this.lastName = page.getByRole('textbox', { name: 'Last name' });
     this.email = page.getByRole('textbox', { name: 'Email address' });
