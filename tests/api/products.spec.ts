@@ -116,28 +116,32 @@ function productListItem(
 }
 
 test.describe('products CRUD', () => {
-  test('should create a product when valid data with existing relations is sent', async ({
-    api,
-  }) => {
-    const deps = await createDeps(api);
-    const data = buildProduct(refsOf(deps));
+  test(
+    'should create a product when valid data with existing relations is sent',
+    { tag: '@smoke' },
+    async ({ api }) => {
+      const deps = await createDeps(api);
+      const data = buildProduct(refsOf(deps));
 
-    const product = await api.products.create(data);
+      const product = await api.products.create(data);
 
-    expect(product).toEqual(createdProduct(product.id, data, deps));
-  });
+      expect(product).toEqual(createdProduct(product.id, data, deps));
+    }
+  );
 
-  test('should return the product when it is requested by id', async ({
-    api,
-  }) => {
-    const deps = await createDeps(api);
-    const data = buildProduct(refsOf(deps));
-    const created = await api.products.create(data);
+  test(
+    'should return the product when it is requested by id',
+    { tag: '@smoke' },
+    async ({ api }) => {
+      const deps = await createDeps(api);
+      const data = buildProduct(refsOf(deps));
+      const created = await api.products.create(data);
 
-    const product = await api.products.get(created.id);
+      const product = await api.products.get(created.id);
 
-    expect(product).toEqual(productDetail(created.id, data, deps));
-  });
+      expect(product).toEqual(productDetail(created.id, data, deps));
+    }
+  );
 
   test('should list only the product when filtered by its category', async ({
     api,

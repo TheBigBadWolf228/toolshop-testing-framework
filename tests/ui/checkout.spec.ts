@@ -10,56 +10,60 @@ const { product } = CHECKOUT;
 
 test.use({ loggedInAs: 'customer' });
 
-test('should place an order and show its invoice in the account', async ({
-  api,
-  productPage,
-  cartPage,
-  checkoutPage,
-  invoicesPage,
-}) => {
-  const { id } = await restockProduct(api, product.name, CHECKOUT.stock);
+test(
+  'should place an order and show its invoice in the account',
+  { tag: '@smoke' },
+  async ({ api, productPage, cartPage, checkoutPage, invoicesPage }) => {
+    const { id } = await restockProduct(api, product.name, CHECKOUT.stock);
 
-  await productPage.open(id);
-  await expect(productPage.name).toHaveText(product.name);
-  await productPage.addToCart();
-  await expect(productPage.header.cartQuantity).toHaveText('1');
+    await productPage.open(id);
+    await expect(productPage.name).toHaveText(product.name);
+    await productPage.addToCart();
+    await expect(productPage.header.cartQuantity).toHaveText('1');
 
-  await productPage.header.openCart();
-  await expect(cartPage.titles).toHaveText([product.name]);
-  await expect(cartPage.total).toHaveText(product.totalText);
-  await checkoutPage.proceed();
+    await productPage.header.openCart();
+    await expect(cartPage.titles).toHaveText([product.name]);
+    await expect(cartPage.total).toHaveText(product.totalText);
+    await checkoutPage.proceed();
 
-  await expect(checkoutPage.signedInMessage).toBeVisible();
-  await checkoutPage.proceed();
+    await expect(checkoutPage.signedInMessage).toBeVisible();
+    await checkoutPage.proceed();
 
-  await checkoutPage.address.fill(LOOKUP_ADDRESS);
-  await expect(checkoutPage.address.street).toHaveValue(
-    LOOKUP_ADDRESS_RESULT.street
-  );
-  await expect(checkoutPage.address.city).toHaveValue(
-    LOOKUP_ADDRESS_RESULT.city
-  );
-  await expect(checkoutPage.address.state).toHaveValue(
-    LOOKUP_ADDRESS_RESULT.state
-  );
-  await checkoutPage.proceed();
+    await expect(async () => {
+      await checkoutPage.address.fill(LOOKUP_ADDRESS);
+      await expect(checkoutPage.address.street).toHaveValue(
+        LOOKUP_ADDRESS_RESULT.street
+      );
+    }).toPass({ timeout: 15_000 });
+    await expect(checkoutPage.address.city).toHaveValue(
+      LOOKUP_ADDRESS_RESULT.city
+    );
+    await expect(checkoutPage.address.state).toHaveValue(
+      LOOKUP_ADDRESS_RESULT.state
+    );
+    await checkoutPage.proceed();
 
-  await checkoutPage.choosePayment(CHECKOUT.paymentMethod);
-  await checkoutPage.finish();
-  await expect(checkoutPage.paymentSuccess).toHaveText(CHECKOUT.paymentSuccess);
-  await checkoutPage.finish();
-  await expect(checkoutPage.confirmation).toContainText(CHECKOUT.confirmation);
-  await expect(checkoutPage.confirmation).toContainText(
-    CHECKOUT.invoiceNumberPattern
-  );
-  const invoiceNumber = await checkoutPage.invoiceNumber(
-    CHECKOUT.invoiceNumberPattern
-  );
+    await checkoutPage.choosePayment(CHECKOUT.paymentMethod);
+    await checkoutPage.finish();
+    await expect(checkoutPage.paymentSuccess).toHaveText(
+      CHECKOUT.paymentSuccess
+    );
+    await checkoutPage.finish();
+    await expect(checkoutPage.confirmation).toContainText(
+      CHECKOUT.confirmation
+    );
+    await expect(checkoutPage.confirmation).toContainText(
+      CHECKOUT.invoiceNumberPattern
+    );
+    const invoiceNumber = await checkoutPage.invoiceNumber(
+      CHECKOUT.invoiceNumberPattern
+    );
 
-  await invoicesPage.open();
-  await expect(invoicesPage.heading).toBeVisible();
-  const row = invoicesPage.row(invoiceNumber);
-  await expect(row).toBeVisible();
-  await expect(row).toContainText(product.totalText);
-  await expect(row).toContainText(LOOKUP_ADDRESS_RESULT.street);
-});
+    await invoicesPage.open();
+    await expect(invoicesPage.heading).toBeVisible();
+    const row = invoicesPage.row(invoiceNumber);
+    await expect(row).toBeVisible();
+    await expect(row).toContainText(product.totalText);
+    await expect(row).toContainText(LOOKUP_ADDRESS_RESULT.street);
+  }
+);

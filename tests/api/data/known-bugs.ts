@@ -1,10 +1,12 @@
 export const PRODUCT_WRITE_WITHOUT_AUTH = {
+  tag: '@known-bug',
   annotation: {
     type: 'issue',
     description: 'Any caller can POST/PUT/PATCH /products (expected 401/403)',
   },
 };
 export const PRODUCT_SERVER_ERROR_ON_INVALID_INPUT = {
+  tag: '@known-bug',
   annotation: {
     type: 'issue',
     description:
@@ -12,6 +14,7 @@ export const PRODUCT_SERVER_ERROR_ON_INVALID_INPUT = {
   },
 };
 export const PRODUCT_PUT_EMPTY_BODY = {
+  tag: '@known-bug',
   annotation: {
     type: 'issue',
     description:
