@@ -77,7 +77,7 @@ export const test = base.extend<ApiFixtures, ApiWorkerFixtures>({
   apiCallLog: async ({}, use, testInfo) => {
     const log = new ApiCallLog();
     await use(log);
-    if (testInfo.status !== testInfo.expectedStatus && !log.isEmpty) {
+    if (testInfo.status !== testInfo.expectedStatus && log.hasFailedCalls) {
       await testInfo.attach('api-calls.md', {
         body: log.toMarkdown(),
         contentType: 'text/markdown',

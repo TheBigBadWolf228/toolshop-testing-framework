@@ -7,7 +7,10 @@ const CURL_HEADERS: readonly string[] = [
   'content-type',
   'authorization',
 ];
-const FAILED_RESOURCE_PREFIX = 'Failed to load resource:';
+const NETWORK_ECHOES: readonly string[] = [
+  'Failed to load resource:',
+  'ERROR {message: Unauthorized}',
+];
 
 export class BrowserLog {
   private readonly calls = new ApiCallLog();
@@ -32,17 +35,26 @@ export class BrowserLog {
     page.on('console', (message) => {
       if (
         message.type() === 'error' &&
-        !message.text().startsWith(FAILED_RESOURCE_PREFIX)
+        !NETWORK_ECHOES.some((echo) => message.text().startsWith(echo))
       ) {
         this.countError(`console: ${message.text()}`);
       }
     });
   }
 
+  async hasFindings(): Promise<boolean> {
+    await Promise.allSettled(this.pending);
+    return (
+      this.calls.hasFailedCalls ||
+      this.failedRequests.length > 0 ||
+      this.errors.size > 0
+    );
+  }
+
   async toMarkdown(url: string): Promise<string> {
     await Promise.allSettled(this.pending);
     const sections = [`Page: ${url}`];
-    if (!this.calls.isEmpty) {
+    if (this.calls.hasFailedCalls) {
       sections.push(
         `Failed API calls from the browser:\n\n${this.calls.toMarkdown()}`
       );

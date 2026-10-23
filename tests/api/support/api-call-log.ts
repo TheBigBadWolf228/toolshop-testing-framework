@@ -39,14 +39,16 @@ export class ApiCallLog {
     this.calls.push(call);
   }
 
-  get isEmpty(): boolean {
-    return this.shownCalls().length === 0;
+  get hasFailedCalls(): boolean {
+    return this.shownCalls().some((call) => call.status >= FIRST_FAILED_STATUS);
   }
 
   toMarkdown(): string {
     return this.shownCalls()
       .map((call, index) => formatCall(call, index + 1))
-      .join('\n\n');
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
   }
 
   private shownCalls(): ApiCall[] {
@@ -155,7 +157,7 @@ function formatCall(call: ApiCall, number: number): string {
   }
   sections.push(`Response:\n${bodyBlock(call.responseBody)}`);
   sections.push(codeBlock('bash', toCurl(call)));
-  return sections.join('\n\n');
+  return `\n${sections.join('\n\n')}\n`;
 }
 
 function isUnauthorizedWithoutToken(call: ApiCall): boolean {

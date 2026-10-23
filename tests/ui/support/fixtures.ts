@@ -132,7 +132,10 @@ export const test = mergeTests(apiTest, uiTest).extend<
     async ({ page }, use, testInfo) => {
       const log = new BrowserLog(page);
       await use(log);
-      if (testInfo.status !== testInfo.expectedStatus) {
+      if (
+        testInfo.status !== testInfo.expectedStatus &&
+        (await log.hasFindings())
+      ) {
         await testInfo.attach('browser-log.md', {
           body: await log.toMarkdown(page.url()),
           contentType: 'text/markdown',
