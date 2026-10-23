@@ -13,8 +13,13 @@ export async function login(
   request: APIRequestContext,
   role: Role
 ): Promise<TokenResponse> {
-  const response = await request.post(LOGIN, { data: getCredentials(role) });
-  await expectStatus(response, 200, `POST ${LOGIN} as ${role}`);
+  const credentials = getCredentials(role);
+  const response = await request.post(LOGIN, { data: credentials });
+  await expectStatus(
+    response,
+    200,
+    `POST ${LOGIN} as ${role} (${credentials.email})`
+  );
   return TokenResponseSchema.parse(await response.json());
 }
 
