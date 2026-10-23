@@ -27,6 +27,11 @@ npm run format:check
 npx playwright show-report
 ```
 
+When a test fails because an API call or the browser failed, the report has
+`api-calls.md` (failed API calls with a curl to reproduce manually)
+For UI tests, `browser-log.md` has page URL, failed browser API calls and console errors.
+UI tests also get a screenshot. The curl uses $TOKEN, so paste valid one first.
+
 ## Coverage
 
 Brands, categories and products have CRUD tests with response schema checks
