@@ -1,6 +1,5 @@
 import type { APIRequestContext } from '@playwright/test';
 import { getCredentials, type Role } from '../../support/users.js';
-import { TOKEN_REFRESH_MARGIN_MS } from '../data/access.js';
 import {
   TokenResponseSchema,
   type TokenResponse,
@@ -8,13 +7,19 @@ import {
 import { expectStatus } from './expect-status.js';
 
 const LOGIN = '/users/login';
+const TOKEN_REFRESH_MARGIN_MS = 60_000;
 
 export async function login(
   request: APIRequestContext,
   role: Role
 ): Promise<TokenResponse> {
-  const response = await request.post(LOGIN, { data: getCredentials(role) });
-  await expectStatus(response, 200, `POST ${LOGIN} as ${role}`);
+  const credentials = getCredentials(role);
+  const response = await request.post(LOGIN, { data: credentials });
+  await expectStatus(
+    response,
+    200,
+    `POST ${LOGIN} as ${role} (${credentials.email})`
+  );
   return TokenResponseSchema.parse(await response.json());
 }
 

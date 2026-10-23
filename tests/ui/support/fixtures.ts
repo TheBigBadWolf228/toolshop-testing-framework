@@ -28,6 +28,7 @@ import { MessagesPage } from '../pages/messages.page.js';
 import { ProductPage } from '../pages/product.page.js';
 import { ProfilePage } from '../pages/profile.page.js';
 import { RegisterPage } from '../pages/register.page.js';
+import { BrowserLog } from './browser-log.js';
 import { trackCarts } from './track-carts.js';
 import { trackProducts } from './track-products.js';
 
@@ -51,6 +52,10 @@ interface UiFixtures {
 
 interface SessionFixtures {
   loggedInAs: Role | undefined;
+}
+
+interface LogFixtures {
+  browserLog: BrowserLog;
 }
 
 interface SeedFixtures {
@@ -115,7 +120,7 @@ const uiTest = base.extend<UiFixtures>({
 });
 
 export const test = mergeTests(apiTest, uiTest).extend<
-  SessionFixtures & SeedFixtures
+  SessionFixtures & LogFixtures & SeedFixtures
 >({
   loggedInAs: [undefined, { option: true }],
   storageState: async ({ loggedInAs, tokens }, use) => {
@@ -123,6 +128,22 @@ export const test = mergeTests(apiTest, uiTest).extend<
       loggedInAs ? toStorageState(await tokens.get(loggedInAs)) : undefined
     );
   },
+  browserLog: [
+    async ({ page }, use, testInfo) => {
+      const log = new BrowserLog(page);
+      await use(log);
+      if (
+        testInfo.status !== testInfo.expectedStatus &&
+        (await log.hasFindings())
+      ) {
+        await testInfo.attach('browser-log.md', {
+          body: await log.toMarkdown(page.url()),
+          contentType: 'text/markdown',
+        });
+      }
+    },
+    { auto: true },
+  ],
   // carts are deleted before the products in them.
   trackedCarts: [
     async ({ page, adminRequest, cleanup: _ }, use) => {
@@ -157,7 +178,7 @@ export const test = mergeTests(apiTest, uiTest).extend<
   },
   // Favorites lock the user (409) and only their owner can delete them
   freshCustomer: async (
-    { api, anonApi, cleanup, context, playwright },
+    { api, anonApi, apiCallLog, cleanup, context, playwright },
     use
   ) => {
     const user = await seedUser(api);
@@ -165,9 +186,11 @@ export const test = mergeTests(apiTest, uiTest).extend<
       email: user.email,
       password: user.password,
     });
-    const request = await newApiContext(playwright, {
-      Authorization: `Bearer ${access_token}`,
-    });
+    const request = await newApiContext(
+      playwright,
+      { Authorization: `Bearer ${access_token}` },
+      apiCallLog
+    );
     const userApi = createApi(request, cleanup);
     await context.addInitScript(
       ({ key, token }) => localStorage.setItem(key, token),
