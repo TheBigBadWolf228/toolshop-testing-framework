@@ -28,6 +28,7 @@ import { MessagesPage } from '../pages/messages.page.js';
 import { ProductPage } from '../pages/product.page.js';
 import { ProfilePage } from '../pages/profile.page.js';
 import { RegisterPage } from '../pages/register.page.js';
+import { BrowserLog } from './browser-log.js';
 import { trackCarts } from './track-carts.js';
 import { trackProducts } from './track-products.js';
 
@@ -51,6 +52,10 @@ interface UiFixtures {
 
 interface SessionFixtures {
   loggedInAs: Role | undefined;
+}
+
+interface LogFixtures {
+  browserLog: BrowserLog;
 }
 
 interface SeedFixtures {
@@ -115,7 +120,7 @@ const uiTest = base.extend<UiFixtures>({
 });
 
 export const test = mergeTests(apiTest, uiTest).extend<
-  SessionFixtures & SeedFixtures
+  SessionFixtures & LogFixtures & SeedFixtures
 >({
   loggedInAs: [undefined, { option: true }],
   storageState: async ({ loggedInAs, tokens }, use) => {
@@ -123,6 +128,19 @@ export const test = mergeTests(apiTest, uiTest).extend<
       loggedInAs ? toStorageState(await tokens.get(loggedInAs)) : undefined
     );
   },
+  browserLog: [
+    async ({ page }, use, testInfo) => {
+      const log = new BrowserLog(page);
+      await use(log);
+      if (testInfo.status !== testInfo.expectedStatus) {
+        await testInfo.attach('browser-log.md', {
+          body: await log.toMarkdown(page.url()),
+          contentType: 'text/markdown',
+        });
+      }
+    },
+    { auto: true },
+  ],
   // carts are deleted before the products in them.
   trackedCarts: [
     async ({ page, adminRequest, cleanup: _ }, use) => {

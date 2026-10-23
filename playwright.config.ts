@@ -23,6 +23,7 @@ export default defineConfig({
   reporter: 'html',
   use: {
     trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
   },
 
   projects: [
