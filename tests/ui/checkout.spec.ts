@@ -27,7 +27,7 @@ test(
     await checkoutPage.proceed();
 
     await expect(checkoutPage.signedInMessage).toBeVisible();
-    await checkoutPage.proceed();
+    await checkoutPage.proceedToAddress();
 
     await checkoutPage.address.fill(LOOKUP_ADDRESS);
     await expect(checkoutPage.address.street).toHaveValue(

@@ -10,7 +10,7 @@ export class CheckoutPage {
   readonly paymentSuccess: Locator;
   readonly confirmation: Locator;
 
-  constructor(page: Page) {
+  constructor(private readonly page: Page) {
     this.address = new AddressForm(page);
     this.proceedButton = page
       .getByRole('button', { name: 'Proceed to checkout' })
@@ -27,6 +27,16 @@ export class CheckoutPage {
     await this.proceedButton.click();
   }
 
+  async proceedToAddress(): Promise<void> {
+    const prefilled = this.page.waitForResponse(
+      (response) =>
+        response.request().method() === 'GET' &&
+        new URL(response.url()).pathname === '/users/me'
+    );
+    await this.proceedButton.click();
+    await prefilled;
+  }
+
   async choosePayment(method: string): Promise<void> {
     await this.paymentMethod.selectOption({ label: method });
   }
@@ -35,7 +45,6 @@ export class CheckoutPage {
     await this.finishButton.click();
   }
 
-  // The number has no element of its own in the rendered message.
   async invoiceNumber(pattern: RegExp): Promise<string> {
     const match = (await this.confirmation.innerText()).match(pattern);
     if (!match) {
