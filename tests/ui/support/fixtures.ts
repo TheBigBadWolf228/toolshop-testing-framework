@@ -15,6 +15,7 @@ import type { Role } from '../../support/users.js';
 import { NON_ECO_CO2_RATING } from '../data/shop.js';
 import { AccountPage } from '../pages/account.page.js';
 import { AdminDashboardPage } from '../pages/admin-dashboard.page.js';
+import { AdminProductFormPage } from '../pages/admin-product-form.page.js';
 import { CartPage } from '../pages/cart.page.js';
 import { CategoryPage } from '../pages/category.page.js';
 import { CheckoutPage } from '../pages/checkout.page.js';
@@ -28,6 +29,7 @@ import { ProductPage } from '../pages/product.page.js';
 import { ProfilePage } from '../pages/profile.page.js';
 import { RegisterPage } from '../pages/register.page.js';
 import { trackCarts } from './track-carts.js';
+import { trackProducts } from './track-products.js';
 
 interface UiFixtures {
   homePage: HomePage;
@@ -44,6 +46,7 @@ interface UiFixtures {
   contactPage: ContactPage;
   messagesPage: MessagesPage;
   adminDashboardPage: AdminDashboardPage;
+  adminProductFormPage: AdminProductFormPage;
 }
 
 interface SessionFixtures {
@@ -52,6 +55,7 @@ interface SessionFixtures {
 
 interface SeedFixtures {
   trackedCarts: void;
+  trackedProducts: void;
   seedProduct: (overrides?: Partial<ProductRequest>) => Promise<CreatedProduct>;
   newUser: NewUser;
   freshCustomer: FreshCustomer;
@@ -105,6 +109,9 @@ const uiTest = base.extend<UiFixtures>({
   adminDashboardPage: async ({ page }, use) => {
     await use(new AdminDashboardPage(page));
   },
+  adminProductFormPage: async ({ page }, use) => {
+    await use(new AdminProductFormPage(page));
+  },
 });
 
 export const test = mergeTests(apiTest, uiTest).extend<
@@ -123,6 +130,13 @@ export const test = mergeTests(apiTest, uiTest).extend<
       trackCarts(page, carts);
       await use();
       await carts.run();
+    },
+    { auto: true },
+  ],
+  trackedProducts: [
+    async ({ page, cleanup }, use) => {
+      trackProducts(page, cleanup);
+      await use();
     },
     { auto: true },
   ],
