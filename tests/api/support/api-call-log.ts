@@ -40,13 +40,33 @@ export class ApiCallLog {
   }
 
   get isEmpty(): boolean {
-    return this.calls.length === 0;
+    return this.shownCalls().length === 0;
   }
 
   toMarkdown(): string {
-    return this.calls
+    return this.shownCalls()
       .map((call, index) => formatCall(call, index + 1))
       .join('\n\n');
+  }
+
+  private shownCalls(): ApiCall[] {
+    const seen = new Set<string>();
+    return this.calls.filter((call) => {
+      if (call.status < FIRST_FAILED_STATUS) {
+        return true;
+      }
+      if (isUnauthorizedWithoutToken(call)) {
+        return false;
+      }
+      const key = [call.method, call.url, call.status, call.responseBody].join(
+        ' '
+      );
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    });
   }
 }
 
@@ -136,6 +156,13 @@ function formatCall(call: ApiCall, number: number): string {
   sections.push(`Response:\n${bodyBlock(call.responseBody)}`);
   sections.push(codeBlock('bash', toCurl(call)));
   return sections.join('\n\n');
+}
+
+function isUnauthorizedWithoutToken(call: ApiCall): boolean {
+  return (
+    call.status === 401 &&
+    !Object.keys(call.requestHeaders).some(isAuthorization)
+  );
 }
 
 function bodyBlock(body: unknown): string {
