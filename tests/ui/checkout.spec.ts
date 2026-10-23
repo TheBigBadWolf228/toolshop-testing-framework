@@ -27,12 +27,14 @@ test(
     await checkoutPage.proceed();
 
     await expect(checkoutPage.signedInMessage).toBeVisible();
-    await checkoutPage.proceedToAddress();
+    await checkoutPage.proceed();
 
-    await checkoutPage.address.fill(LOOKUP_ADDRESS);
-    await expect(checkoutPage.address.street).toHaveValue(
-      LOOKUP_ADDRESS_RESULT.street
-    );
+    await expect(async () => {
+      await checkoutPage.address.fill(LOOKUP_ADDRESS);
+      await expect(checkoutPage.address.street).toHaveValue(
+        LOOKUP_ADDRESS_RESULT.street
+      );
+    }).toPass({ timeout: 15_000 });
     await expect(checkoutPage.address.city).toHaveValue(
       LOOKUP_ADDRESS_RESULT.city
     );

@@ -10,14 +10,13 @@ export class CheckoutPage {
   readonly paymentSuccess: Locator;
   readonly confirmation: Locator;
 
-  constructor(private readonly page: Page) {
+  constructor(page: Page) {
     this.address = new AddressForm(page);
     this.proceedButton = page
       .getByRole('button', { name: 'Proceed to checkout' })
       .filter({ visible: true });
     this.signedInMessage = page.getByText('you are already logged in');
     this.paymentMethod = page.getByRole('combobox', { name: 'Payment Method' });
-    // Label changes from "Check payment" to "Confirm" after the first click.
     this.finishButton = page.getByTestId('finish');
     this.paymentSuccess = page.getByTestId('payment-success-message');
     this.confirmation = page.getByText('Your invoice number is');
@@ -25,16 +24,6 @@ export class CheckoutPage {
 
   async proceed(): Promise<void> {
     await this.proceedButton.click();
-  }
-
-  async proceedToAddress(): Promise<void> {
-    const prefilled = this.page.waitForResponse(
-      (response) =>
-        response.request().method() === 'GET' &&
-        new URL(response.url()).pathname === '/users/me'
-    );
-    await this.proceedButton.click();
-    await prefilled;
   }
 
   async choosePayment(method: string): Promise<void> {
