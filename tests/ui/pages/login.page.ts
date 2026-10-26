@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { step } from '../../support/step.js';
 
 export class LoginPage {
   static readonly path = '/auth/login';
@@ -17,10 +18,12 @@ export class LoginPage {
     this.errorMessage = page.getByText('Invalid email or password');
   }
 
+  @step('Open login page')
   async open(): Promise<void> {
     await this.page.goto(LoginPage.path);
   }
 
+  @step('Log in as {0}')
   async login(email: string, password: string): Promise<void> {
     await this.emailInput.fill(email);
     await this.passwordInput.fill(password);

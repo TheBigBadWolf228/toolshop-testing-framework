@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { step } from '../../support/step.js';
 
 export interface AddressInput {
   country: string;
@@ -23,6 +24,7 @@ export class AddressForm {
     this.state = page.getByRole('textbox', { name: 'State' });
   }
 
+  @step('Fill address')
   async fill(address: AddressInput): Promise<void> {
     await this.country.selectOption({ label: address.country });
     await this.postalCode.fill(address.postalCode);

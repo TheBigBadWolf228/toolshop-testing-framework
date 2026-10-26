@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { step } from '../../support/step.js';
 import { Header } from '../components/header.component.js';
 
 export class CartPage {
@@ -33,12 +34,14 @@ export class CartPage {
     });
   }
 
+  @step('Set quantity of {0} to {1}')
   async setQuantity(name: string, quantity: number): Promise<void> {
     const input = this.quantity(name);
     await input.fill(String(quantity));
     await input.press('Tab');
   }
 
+  @step('Remove {0} from cart')
   async remove(name: string): Promise<void> {
     await this.row(name).locator('.btn-danger').click();
   }

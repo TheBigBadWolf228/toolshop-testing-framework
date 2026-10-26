@@ -32,10 +32,12 @@ export default defineConfig({
   workers: process.env.CI ? 1 : 4,
   reporter: [
     ['html'],
+    ['./tests/support/summary-reporter.ts'],
     [
       './tests/support/allure-reporter.ts',
       {
         resultsDir: 'allure-results',
+        detail: false,
         environmentInfo: {
           'UI URL': UI_URL,
           'API URL': API_URL,

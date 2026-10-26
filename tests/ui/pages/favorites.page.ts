@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { step } from '../../support/step.js';
 
 export class FavoritesPage {
   static readonly path = '/account/favorites';
@@ -11,6 +12,7 @@ export class FavoritesPage {
     this.emptyMessage = page.getByText('There are no favorites yet.');
   }
 
+  @step('Open favorites')
   async open(): Promise<void> {
     await this.page.goto(FavoritesPage.path);
   }
@@ -21,6 +23,7 @@ export class FavoritesPage {
     });
   }
 
+  @step('Remove {0} from favorites')
   async remove(name: string): Promise<void> {
     await this.card(name).getByTestId('delete').click();
   }

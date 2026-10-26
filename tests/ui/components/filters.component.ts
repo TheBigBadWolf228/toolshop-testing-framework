@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { step } from '../../support/step.js';
 
 const PAGE_STEP = 20;
 const MAX_KEY_PRESSES = 300;
@@ -20,10 +21,12 @@ export class Filters {
     });
   }
 
+  @step('Filter by {0}')
   async check(label: string): Promise<void> {
     await this.root.getByRole('checkbox', { name: label, exact: true }).check();
   }
 
+  @step('Set price range {0} to {1}')
   async setPriceRange(min: number, max: number): Promise<void> {
     if (max >= (await sliderValue(this.minPriceSlider))) {
       await moveSlider(this.maxPriceSlider, max);

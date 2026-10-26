@@ -1,6 +1,7 @@
 import type { Locator, Page } from '@playwright/test';
 import { IdSchema } from '../../api/schemas/responses.schema.js';
 import { API_URL } from '../../support/env.js';
+import { step } from '../../support/step.js';
 
 export interface AdminProductForm {
   name: string;
@@ -39,10 +40,12 @@ export class AdminProductFormPage {
       .filter({ hasText: 'Product saved!' });
   }
 
+  @step('Open admin product form')
   async open(): Promise<void> {
     await this.page.goto(AdminProductFormPage.path);
   }
 
+  @step('Fill product form')
   async fill(product: AdminProductForm): Promise<void> {
     await this.name.fill(product.name);
     await this.description.fill(product.description);
@@ -53,6 +56,7 @@ export class AdminProductFormPage {
     await this.image.selectOption({ label: product.image });
   }
 
+  @step('Save product')
   async save(): Promise<string> {
     const created = this.page.waitForResponse(
       (response) =>

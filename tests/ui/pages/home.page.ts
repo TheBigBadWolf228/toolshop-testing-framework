@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { step } from '../../support/step.js';
 import { Filters } from '../components/filters.component.js';
 import { Header } from '../components/header.component.js';
 import { ProductGrid } from '../components/product-grid.component.js';
@@ -22,19 +23,23 @@ export class HomePage {
     this.resetButton = page.getByTestId('search-reset');
   }
 
+  @step('Open home page')
   async open(): Promise<void> {
     await this.page.goto(HomePage.path);
   }
 
+  @step('Search for {0}')
   async search(term: string): Promise<void> {
     await this.searchInput.fill(term);
     await this.searchButton.click();
   }
 
+  @step('Reset search')
   async resetSearch(): Promise<void> {
     await this.resetButton.click();
   }
 
+  @step('Go to page {0}')
   async goToPage(pageNumber: number): Promise<void> {
     await this.page
       .getByRole('button', { name: `Page-${pageNumber}`, exact: true })
