@@ -30,8 +30,10 @@ jobs:
           curl -sS -o /dev/null -w "browser UA: %{http_code}\n" \
             -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130 Safari/537.36" \
             https://api.practicesoftwaretesting.com/brands
-          curl -sS -o /dev/null -w "ui: %{http_code}\n" https://practicesoftwaretesting.com
+          curl -sS -i -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130 Safari/537.36" \
+            https://practicesoftwaretesting.com | grep -i -E "^(HTTP|server|cf-mitigated|cf-ray)|<title>"
       - name: Check the app is reachable
+        continue-on-error: true
         run: |
           curl -fsS -o /dev/null https://api.practicesoftwaretesting.com/brands
           curl -fsS -o /dev/null https://practicesoftwaretesting.com
