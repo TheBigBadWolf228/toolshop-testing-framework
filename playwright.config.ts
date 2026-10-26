@@ -32,6 +32,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : 4,
   reporter: [
     ['html'],
+    ['./tests/support/summary-reporter.ts'],
     [
       './tests/support/allure-reporter.ts',
       {
