@@ -35,7 +35,7 @@ UI tests also get a screenshot. The curl uses $TOKEN, so paste valid one first.
 
 Every run writes two reports.
 
-The Playwright HTML report is for debugging. It has every click and API call, the trace, screenshots 
+The Playwright HTML report is for debugging. It has every click and API call, the trace, screenshots
 and the logs above.
 
 ```bash
@@ -43,7 +43,7 @@ npx playwright show-report
 ```
 
 The Allure report is the readable one. It shows only the test steps, like
-"Create product" or "Add to cart", but not every click. 
+"Create product" or "Add to cart", but not every click.
 It groups failures by cause like:
 login failed, cleanup failed, API server error, timeout.
 It links known bugs to their GitHub issue and keeps history between runs, so new
