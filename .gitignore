@@ -7,6 +7,11 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 
+# Allure
+/allure-results/
+/allure-report/
+/allure-history.jsonl
+
 # Output documentation with tasks
 /documentation/
 

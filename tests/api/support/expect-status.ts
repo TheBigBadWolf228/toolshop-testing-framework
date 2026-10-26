@@ -5,6 +5,9 @@ export async function expectStatus(
   status: number,
   action: string
 ): Promise<void> {
+  if (response.status() === status) {
+    return;
+  }
   expect(
     response.status(),
     `${action} failed: ${response.status()} ${await response.text()}`

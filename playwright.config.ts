@@ -33,7 +33,7 @@ export default defineConfig({
   reporter: [
     ['html'],
     [
-      'allure-playwright',
+      './tests/support/allure-reporter.ts',
       {
         resultsDir: 'allure-results',
         environmentInfo: {
