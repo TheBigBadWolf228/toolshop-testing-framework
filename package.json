@@ -9,6 +9,7 @@
     "test:api": "playwright test --project=\"API\"",
     "test:all": "playwright test",
     "test:smoke": "playwright test --grep @smoke --project=\"UI Chrome\" --project=\"API\"",
+    "report:allure": "rm -rf allure-report && allure generate && allure open allure-report",
     "typecheck": "tsc --noEmit",
     "format:check": "prettier --check ."
   },
@@ -19,6 +20,8 @@
     "@faker-js/faker": "^10.6.0",
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.2.0",
+    "allure": "^3.20.1",
+    "allure-playwright": "^3.14.0",
     "prettier": "3.9.6",
     "tsx": "^4.23.12",
     "typescript": "^7.0.2",
