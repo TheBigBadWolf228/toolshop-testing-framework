@@ -36,6 +36,7 @@ export default defineConfig({
       './tests/support/allure-reporter.ts',
       {
         resultsDir: 'allure-results',
+        detail: false,
         environmentInfo: {
           'UI URL': UI_URL,
           'API URL': API_URL,
