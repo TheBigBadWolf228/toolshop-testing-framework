@@ -9,6 +9,7 @@
     "test:api": "playwright test --project=\"API\"",
     "test:all": "playwright test",
     "test:smoke": "playwright test --grep @smoke --project=\"UI Chrome\" --project=\"API\"",
+    "report:allure": "rm -rf allure-report && allure generate && allure open allure-report",
     "typecheck": "tsc --noEmit",
     "format:check": "prettier --check ."
   },
