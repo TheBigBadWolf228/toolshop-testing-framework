@@ -1,24 +1,31 @@
-import type { Page, Response } from '@playwright/test';
+import type { Page, Request } from '@playwright/test';
 import { IdSchema } from '../../api/schemas/responses.schema.js';
 import type { Cleanup } from '../../api/support/cleanup.js';
 import { API_URL } from '../../support/env.js';
 
 const PRODUCTS = '/products';
 
-function isProductCreated(response: Response): boolean {
+function isProductCreate(request: Request): boolean {
   return (
-    response.request().method() === 'POST' &&
-    response.url() === `${API_URL}${PRODUCTS}` &&
-    response.ok()
+    request.method() === 'POST' && request.url() === `${API_URL}${PRODUCTS}`
   );
 }
 
-export function trackProducts(page: Page, cleanup: Cleanup): void {
-  page.on('response', async (response) => {
-    if (!isProductCreated(response)) {
+export function trackProducts(page: Page, cleanup: Cleanup): Promise<void>[] {
+  const pending: Promise<void>[] = [];
+  page.on('request', (request) => {
+    if (!isProductCreate(request)) {
       return;
     }
-    const { id } = IdSchema.parse(await response.json());
-    cleanup.addDelete(`product ${id}`, `${PRODUCTS}/${id}`);
+    pending.push(
+      request.response().then(async (response) => {
+        if (!response?.ok()) {
+          return;
+        }
+        const { id } = IdSchema.parse(await response.json());
+        cleanup.addDelete(`product ${id}`, `${PRODUCTS}/${id}`);
+      })
+    );
   });
+  return pending;
 }
