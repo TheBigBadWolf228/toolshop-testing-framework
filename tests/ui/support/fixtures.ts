@@ -148,16 +148,18 @@ export const test = mergeTests(apiTest, uiTest).extend<
   trackedCarts: [
     async ({ page, adminRequest, cleanup: _ }, use) => {
       const carts = new Cleanup(adminRequest);
-      trackCarts(page, carts);
+      const pending = trackCarts(page, carts);
       await use();
+      await Promise.all(pending);
       await carts.run();
     },
     { auto: true },
   ],
   trackedProducts: [
     async ({ page, cleanup }, use) => {
-      trackProducts(page, cleanup);
+      const pending = trackProducts(page, cleanup);
       await use();
+      await Promise.all(pending);
     },
     { auto: true },
   ],
