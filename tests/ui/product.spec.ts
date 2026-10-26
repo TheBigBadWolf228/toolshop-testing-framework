@@ -7,6 +7,7 @@ test(
   { tag: '@smoke' },
   async ({ page, homePage, productPage }) => {
     await homePage.open();
+    await expect(homePage.grid.names.first()).toBeVisible();
     await homePage.search(PRODUCT_DETAILS.name);
     await homePage.grid.openProduct(PRODUCT_DETAILS.name);
 
