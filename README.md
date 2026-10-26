@@ -7,7 +7,7 @@ UI tests will be described here once more of them are added with the Page Object
 
 ## Stack
 
-Playwright, TypeScript, Zod, Faker, Prettier.
+Playwright, TypeScript, Zod, Faker, Allure, Prettier.
 
 ## Setup
 
@@ -24,13 +24,39 @@ The .env file holds the admin and customer logins. The defaults are the demo acc
 npm run test:api
 npm run typecheck
 npm run format:check
-npx playwright show-report
 ```
 
 When a test fails because an API call or the browser failed, the report has
 `api-calls.md` (failed API calls with a curl to reproduce manually)
 For UI tests, `browser-log.md` has page URL, failed browser API calls and console errors.
 UI tests also get a screenshot. The curl uses $TOKEN, so paste valid one first.
+
+## Reports
+
+Every run writes two reports.
+
+The Playwright HTML report is for debugging. It has every click and API call, the trace, screenshots 
+and the logs above.
+
+```bash
+npx playwright show-report
+```
+
+The Allure report is the readable one. It shows only the test steps, like
+"Create product" or "Add to cart", but not every click. 
+It groups failures by cause like:
+login failed, cleanup failed, API server error, timeout.
+It links known bugs to their GitHub issue and keeps history between runs, so new
+and flaky tests stand out.
+
+```bash
+npm run report:allure
+```
+
+The terminal also prints a short summary at the end of a run when there is
+something to know: how many known bugs still fail as expected, a known bug that
+started passing (close its issue and remove test.fail), and tests that passed
+only on retry.
 
 ## Coverage
 
