@@ -1,4 +1,6 @@
+import { execSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import {
   defineConfig,
   devices,
@@ -11,6 +13,14 @@ const sharedUiUse: Partial<PlaywrightTestOptions> = {
   testIdAttribute: 'data-test',
 };
 
+const { version: playwrightVersion } = createRequire(import.meta.url)(
+  '@playwright/test/package.json'
+) as { version: string };
+
+function git(args: string): string {
+  return execSync(`git ${args}`, { encoding: 'utf8' }).trim();
+}
+
 if (existsSync('.env')) {
   process.loadEnvFile('.env');
 }
@@ -20,7 +30,24 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : 4,
-  reporter: 'html',
+  reporter: [
+    ['html'],
+    [
+      'allure-playwright',
+      {
+        resultsDir: 'allure-results',
+        environmentInfo: {
+          'UI URL': UI_URL,
+          'API URL': API_URL,
+          Run: process.env.CI ? 'CI' : 'local',
+          Branch: git('rev-parse --abbrev-ref HEAD'),
+          Commit: git('rev-parse --short HEAD'),
+          Node: process.version,
+          Playwright: playwrightVersion,
+        },
+      },
+    ],
+  ],
   use: {
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
