@@ -23,26 +23,17 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
-      - name: Diagnose app access
-        run: |
-          curl -sS https://api.ipify.org; echo
-          curl -sS -i https://api.practicesoftwaretesting.com/brands | head -20
-          curl -sS -o /dev/null -w "browser UA: %{http_code}\n" \
-            -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130 Safari/537.36" \
-            https://api.practicesoftwaretesting.com/brands
-          curl -sS -i -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130 Safari/537.36" \
-            https://practicesoftwaretesting.com | grep -i -E "^(HTTP|server|cf-mitigated|cf-ray)|<title>"
-      - name: Check the app is reachable
-        continue-on-error: true
-        run: |
-          curl -fsS -o /dev/null https://api.practicesoftwaretesting.com/brands
-          curl -fsS -o /dev/null https://practicesoftwaretesting.com
+      - name: Check the API is reachable
+        run: curl -fsS -o /dev/null https://api.practicesoftwaretesting.com/brands
       - name: Install dependencies
         run: npm ci
+      # No UI Chrome on CI until the app is self-hosted: Cloudflare on the
+      # hosted demo challenges headless Chromium from GitHub runner IPs on every page
+      # load. Firefox and WebKit get through. Chrome still runs locally.
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: npx playwright install --with-deps firefox webkit
       - name: Run Playwright tests
-        run: npx playwright test
+        run: npx playwright test --project="API" --project="UI Firefox" --project="UI Safari"
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
