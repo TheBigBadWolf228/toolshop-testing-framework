@@ -23,6 +23,14 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+      - name: Diagnose app access
+        run: |
+          curl -sS https://api.ipify.org; echo
+          curl -sS -i https://api.practicesoftwaretesting.com/brands | head -20
+          curl -sS -o /dev/null -w "browser UA: %{http_code}\n" \
+            -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/130 Safari/537.36" \
+            https://api.practicesoftwaretesting.com/brands
+          curl -sS -o /dev/null -w "ui: %{http_code}\n" https://practicesoftwaretesting.com
       - name: Check the app is reachable
         run: |
           curl -fsS -o /dev/null https://api.practicesoftwaretesting.com/brands
