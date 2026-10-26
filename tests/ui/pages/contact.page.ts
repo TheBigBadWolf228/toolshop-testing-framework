@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { step } from '../../support/step.js';
 
 export interface ContactForm {
   firstName: string;
@@ -39,10 +40,12 @@ export class ContactPage {
       .filter({ hasText: 'Thanks for your message!' });
   }
 
+  @step('Open contact page')
   async open(): Promise<void> {
     await this.page.goto(ContactPage.path);
   }
 
+  @step('Fill contact form as guest')
   async fillAsGuest(form: ContactForm): Promise<void> {
     await this.firstName.fill(form.firstName);
     await this.lastName.fill(form.lastName);
@@ -50,11 +53,13 @@ export class ContactPage {
     await this.fillAsCustomer(form);
   }
 
+  @step('Fill contact form as customer')
   async fillAsCustomer(form: CustomerContactForm): Promise<void> {
     await this.subject.selectOption({ label: form.subject });
     await this.message.fill(form.message);
   }
 
+  @step('Send contact message')
   async send(): Promise<void> {
     await this.sendButton.click();
   }

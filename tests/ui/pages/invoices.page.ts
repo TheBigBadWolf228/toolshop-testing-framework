@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { step } from '../../support/step.js';
 
 export class InvoicesPage {
   static readonly path = '/account/invoices';
@@ -13,6 +14,7 @@ export class InvoicesPage {
     this.rows = page.getByRole('row').filter({ has: page.getByRole('cell') });
   }
 
+  @step('Open invoices')
   async open(): Promise<void> {
     const invoicesLoaded = this.page.waitForResponse(
       (response) =>

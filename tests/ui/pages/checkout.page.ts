@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { step } from '../../support/step.js';
 import { AddressForm } from '../components/address-form.component.js';
 
 export class CheckoutPage {
@@ -22,18 +23,22 @@ export class CheckoutPage {
     this.confirmation = page.getByText('Your invoice number is');
   }
 
+  @step('Proceed to next checkout step')
   async proceed(): Promise<void> {
     await this.proceedButton.click();
   }
 
+  @step('Choose payment method {0}')
   async choosePayment(method: string): Promise<void> {
     await this.paymentMethod.selectOption({ label: method });
   }
 
+  @step('Finish checkout')
   async finish(): Promise<void> {
     await this.finishButton.click();
   }
 
+  @step('Read invoice number')
   async invoiceNumber(pattern: RegExp): Promise<string> {
     const match = (await this.confirmation.innerText()).match(pattern);
     if (!match) {

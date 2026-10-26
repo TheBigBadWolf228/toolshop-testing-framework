@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { step } from '../../support/step.js';
 
 export class Header {
   readonly categoriesMenu: Locator;
@@ -15,6 +16,7 @@ export class Header {
     this.cartQuantity = page.getByTestId('cart-quantity');
   }
 
+  @step('Open category {0}')
   async openCategory(name: string): Promise<void> {
     await this.categoriesMenu.click();
     await this.page
@@ -23,10 +25,12 @@ export class Header {
       .click();
   }
 
+  @step('Open cart')
   async openCart(): Promise<void> {
     await this.cartLink.click();
   }
 
+  @step('Sign out')
   async signOut(): Promise<void> {
     await this.userMenu.click();
     await this.signOutLink.click();

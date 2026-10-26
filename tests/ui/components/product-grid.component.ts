@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { step } from '../../support/step.js';
 
 export class ProductGrid {
   readonly names: Locator;
@@ -13,14 +14,17 @@ export class ProductGrid {
       .locator('.co2-letter.active');
   }
 
+  @step('Open product {0} from grid')
   async openProduct(name: string): Promise<void> {
     await this.names.and(this.page.getByText(name, { exact: true })).click();
   }
 
+  @step('Read product names')
   readNames(): Promise<string[]> {
     return this.readTexts(this.names);
   }
 
+  @step('Read product prices')
   async readPrices(): Promise<number[]> {
     return (await this.readTexts(this.prices)).map((price) =>
       Number(price.replace('$', ''))

@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { step } from '../../support/step.js';
 import { Header } from '../components/header.component.js';
 
 export class ProductPage {
@@ -35,18 +36,22 @@ export class ProductPage {
       .getByRole('heading', { level: 5 });
   }
 
+  @step('Open product {0}')
   async open(id: string): Promise<void> {
     await this.page.goto(`/product/${id}`);
   }
 
+  @step('Add to cart')
   async addToCart(): Promise<void> {
     await this.addToCartButton.click();
   }
 
+  @step('Add to favorites')
   async addToFavorites(): Promise<void> {
     await this.addToFavoritesButton.click();
   }
 
+  @step('Open related product {0}')
   async openRelated(name: string): Promise<void> {
     await this.relatedNames
       .and(this.page.getByText(name, { exact: true }))

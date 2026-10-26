@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test';
 import type { NewUser } from '../../api/schemas/user.schema.js';
+import { step } from '../../support/step.js';
 import { AddressForm } from '../components/address-form.component.js';
 
 export class RegisterPage {
@@ -27,10 +28,12 @@ export class RegisterPage {
     this.submitButton = page.getByRole('button', { name: 'Register' });
   }
 
+  @step('Open registration page')
   async open(): Promise<void> {
     await this.page.goto(RegisterPage.path);
   }
 
+  @step('Fill registration form')
   async fillDetails(user: NewUser): Promise<void> {
     await this.firstName.fill(user.first_name);
     await this.lastName.fill(user.last_name);
@@ -40,6 +43,7 @@ export class RegisterPage {
     await this.password.fill(user.password);
   }
 
+  @step('Submit registration')
   async submit(): Promise<void> {
     await this.submitButton.click();
   }

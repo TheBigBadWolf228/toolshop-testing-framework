@@ -1,4 +1,5 @@
 import type { Locator, Page } from '@playwright/test';
+import { step } from '../../support/step.js';
 
 const STATUS_COLUMN = 2;
 
@@ -11,6 +12,7 @@ export class MessagesPage {
     this.heading = page.getByRole('heading', { name: 'Messages' });
   }
 
+  @step('Open messages')
   async open(): Promise<void> {
     await this.page.goto(MessagesPage.path);
   }

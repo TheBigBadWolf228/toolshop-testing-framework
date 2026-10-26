@@ -17,7 +17,6 @@ export function step(title?: string) {
       const name = title
         ? fillTitle(title, args)
         : `${(this as object).constructor.name}.${String(context.name)}`;
-      // `return await` keeps this frame on the async stack, so `box` can point at the caller.
       return await test.step(name, () => target.call(this, ...args), {
         box: true,
       });

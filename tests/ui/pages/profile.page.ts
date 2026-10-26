@@ -1,5 +1,6 @@
 import type { Locator, Page } from '@playwright/test';
 import type { NewUser } from '../../api/schemas/user.schema.js';
+import { step } from '../../support/step.js';
 import { Header } from '../components/header.component.js';
 
 export type ProfileChanges = Pick<
@@ -30,10 +31,12 @@ export class ProfilePage {
       .filter({ hasText: 'Your profile is successfully updated!' });
   }
 
+  @step('Open profile')
   async open(): Promise<void> {
     await this.page.goto(ProfilePage.path);
   }
 
+  @step('Update profile')
   async update(changes: ProfileChanges): Promise<void> {
     await this.firstName.fill(changes.first_name);
     await this.lastName.fill(changes.last_name);
