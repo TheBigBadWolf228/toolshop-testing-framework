@@ -30,6 +30,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : 4,
+  globalTimeout: process.env.CI ? 45 * 60 * 1000 : undefined,
   reporter: [
     ['html'],
     ['./tests/support/summary-reporter.ts'],
