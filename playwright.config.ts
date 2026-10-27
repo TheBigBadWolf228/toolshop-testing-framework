@@ -32,7 +32,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : 4,
   globalTimeout: process.env.CI ? 45 * 60 * 1000 : undefined,
   reporter: [
-    ['html'],
+    [process.env.CI ? 'blob' : 'html'],
     ...(process.env.CI ? [['github'] as const] : []),
     ['./tests/support/summary-reporter.ts'],
     [
