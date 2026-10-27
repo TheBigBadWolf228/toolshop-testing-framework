@@ -10,7 +10,19 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Check formatting
+        run: npm run format:check
+      - name: Check types
+        run: npm run typecheck
+      - name: Check tests load
+        run: npx playwright test --list --reporter=list
   test:
+    needs: gate
     runs-on: ubuntu-latest
     env:
       CUSTOMER_EMAIL: ${{ secrets.CUSTOMER_EMAIL }}
@@ -19,18 +31,14 @@ jobs:
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: .nvmrc
-          cache: npm
       - name: Check the API is reachable
         run: curl -fsS -o /dev/null https://api.practicesoftwaretesting.com/brands
-      - name: Install dependencies
-        run: npm ci
+      - uses: ./.github/actions/setup
       # No UI Chrome on CI until the app is self-hosted: Cloudflare on the
       # hosted demo challenges headless Chromium from GitHub runner IPs on every page
       # load. Firefox and WebKit get through. Chrome still runs locally.
       - name: Install Playwright Browsers
+        timeout-minutes: 15
         run: npx playwright install --with-deps firefox webkit
       - name: Run Playwright tests
         run: npx playwright test --project="API" --project="UI Firefox" --project="UI Safari"

@@ -33,6 +33,7 @@ export default defineConfig({
   globalTimeout: process.env.CI ? 45 * 60 * 1000 : undefined,
   reporter: [
     ['html'],
+    ...(process.env.CI ? [['github'] as const] : []),
     ['./tests/support/summary-reporter.ts'],
     [
       './tests/support/allure-reporter.ts',
