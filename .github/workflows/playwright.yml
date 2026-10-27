@@ -49,7 +49,7 @@ jobs:
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
   ui:
     needs: smoke
-    name: UI ${{ matrix.browser }} ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+    name: UI ${{ matrix.target.browser }} ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
     strategy:
       fail-fast: false
       # PRs run one browser, merges to main run all CI browsers.
@@ -57,20 +57,15 @@ jobs:
       # hosted demo denies headless Chromium from GitHub runner IPs on every page.
       # Firefox and WebKit get through. Chrome still runs locally.
       matrix:
-        browser: ${{ fromJSON(github.event_name == 'pull_request' && '["firefox"]' || '["firefox","webkit"]') }}
+        target: ${{ fromJSON(github.event_name == 'pull_request' && '[{"project":"UI Firefox","browser":"firefox"}]' || '[{"project":"UI Firefox","browser":"firefox"},{"project":"UI Safari","browser":"webkit"}]') }}
         shardIndex: [1, 2]
         shardTotal: [2]
-        include:
-          - browser: firefox
-            project: UI Firefox
-          - browser: webkit
-            project: UI Safari
     uses: ./.github/workflows/run-tests.yml
     with:
-      projects: --project="${{ matrix.project }}"
-      browser: ${{ matrix.browser }}
+      projects: --project="${{ matrix.target.project }}"
+      browser: ${{ matrix.target.browser }}
       shard: ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
-      report-name: blob-full-ui-${{ matrix.browser }}-${{ matrix.shardIndex }}
+      report-name: blob-full-ui-${{ matrix.target.browser }}-${{ matrix.shardIndex }}
     secrets:
       CUSTOMER_EMAIL: ${{ secrets.CUSTOMER_EMAIL }}
       CUSTOMER_PASSWORD: ${{ secrets.CUSTOMER_PASSWORD }}
