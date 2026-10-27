@@ -41,6 +41,7 @@ jobs:
     uses: ./.github/workflows/run-tests.yml
     with:
       projects: --project="API"
+      workers: '2'
       report-name: blob-full-api
     secrets:
       CUSTOMER_EMAIL: ${{ secrets.CUSTOMER_EMAIL }}

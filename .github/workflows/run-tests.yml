@@ -14,6 +14,9 @@ on:
       shard:
         type: string
         default: ''
+      workers:
+        type: string
+        default: ''
       report-name:
         type: string
         required: true
@@ -44,7 +47,7 @@ jobs:
         timeout-minutes: 15
         run: npx playwright install --with-deps ${{ inputs.browser }}
       - name: Run Playwright tests
-        run: npx playwright test --workers=2 ${{ inputs.projects }} ${{ inputs.grep && format('--grep "{0}"', inputs.grep) || '' }} ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }}
+        run: npx playwright test ${{ inputs.projects }} ${{ inputs.grep && format('--grep "{0}"', inputs.grep) || '' }} ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }} ${{ inputs.workers && format('--workers={0}', inputs.workers) || '' }}
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
