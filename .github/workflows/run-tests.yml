@@ -11,6 +11,9 @@ on:
       grep:
         type: string
         default: ''
+      shard:
+        type: string
+        default: ''
       report-name:
         type: string
         required: true
@@ -41,10 +44,10 @@ jobs:
         timeout-minutes: 15
         run: npx playwright install --with-deps ${{ inputs.browser }}
       - name: Run Playwright tests
-        run: npx playwright test ${{ inputs.projects }} ${{ inputs.grep && format('--grep "{0}"', inputs.grep) || '' }}
+        run: npx playwright test ${{ inputs.projects }} ${{ inputs.grep && format('--grep "{0}"', inputs.grep) || '' }} ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }}
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
           name: ${{ inputs.report-name }}
-          path: playwright-report/
-          retention-days: 30
+          path: blob-report/
+          retention-days: 1
