@@ -21,30 +21,48 @@ jobs:
         run: npm run typecheck
       - name: Check tests load
         run: npx playwright test --list --reporter=list
-  test:
+  smoke:
     needs: gate
-    runs-on: ubuntu-latest
-    env:
+    uses: ./.github/workflows/run-tests.yml
+    with:
+      projects: --project="API" --project="UI Firefox"
+      browser: firefox
+      grep: '@smoke'
+      report-name: report-smoke
+    secrets:
       CUSTOMER_EMAIL: ${{ secrets.CUSTOMER_EMAIL }}
       CUSTOMER_PASSWORD: ${{ secrets.CUSTOMER_PASSWORD }}
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
-    steps:
-      - uses: actions/checkout@v6
-      - name: Check the API is reachable
-        run: curl -fsS -o /dev/null https://api.practicesoftwaretesting.com/brands
-      - uses: ./.github/actions/setup
+  api:
+    needs: smoke
+    uses: ./.github/workflows/run-tests.yml
+    with:
+      projects: --project="API"
+      report-name: report-api
+    secrets:
+      CUSTOMER_EMAIL: ${{ secrets.CUSTOMER_EMAIL }}
+      CUSTOMER_PASSWORD: ${{ secrets.CUSTOMER_PASSWORD }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+  ui:
+    needs: smoke
+    name: UI ${{ matrix.browser }}
+    strategy:
+      fail-fast: false
+      # PRs run one browser, merges to main run all CI browsers.
       # No UI Chrome on CI until the app is self-hosted: Cloudflare on the
-      # hosted demo challenges headless Chromium from GitHub runner IPs on every page
-      # load. Firefox and WebKit get through. Chrome still runs locally.
-      - name: Install Playwright Browsers
-        timeout-minutes: 15
-        run: npx playwright install --with-deps firefox webkit
-      - name: Run Playwright tests
-        run: npx playwright test --project="API" --project="UI Firefox" --project="UI Safari"
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
+      # hosted demo denies headless Chromium from GitHub runner IPs on every page.
+      # Firefox and WebKit get through. Chrome still runs locally.
+      matrix:
+        include: ${{ fromJSON(github.event_name == 'pull_request' && '[{"project":"UI Firefox","browser":"firefox"}]' || '[{"project":"UI Firefox","browser":"firefox"},{"project":"UI Safari","browser":"webkit"}]') }}
+    uses: ./.github/workflows/run-tests.yml
+    with:
+      projects: --project="${{ matrix.project }}"
+      browser: ${{ matrix.browser }}
+      report-name: report-ui-${{ matrix.browser }}
+    secrets:
+      CUSTOMER_EMAIL: ${{ secrets.CUSTOMER_EMAIL }}
+      CUSTOMER_PASSWORD: ${{ secrets.CUSTOMER_PASSWORD }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
