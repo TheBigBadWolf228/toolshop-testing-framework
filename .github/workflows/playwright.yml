@@ -113,7 +113,7 @@ jobs:
           path: allure-report/
   deploy:
     needs: report
-    if: ${{ github.event_name == 'push' && needs.report.result == 'success' }}
+    if: ${{ !cancelled() && github.event_name == 'push' && needs.report.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       pages: write
