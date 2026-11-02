@@ -1,3 +1,4 @@
+import { appendFileSync } from 'node:fs';
 import type { Reporter, Suite, TestCase } from '@playwright/test/reporter';
 
 export default class SummaryReporter implements Reporter {
@@ -40,6 +41,12 @@ export default class SummaryReporter implements Reporter {
     }
     if (lines.length > 0) {
       console.log(`\n${lines.join('\n')}\n`);
+      if (process.env.SUMMARY_FILE) {
+        appendFileSync(
+          process.env.SUMMARY_FILE,
+          `### Test summary\n\n\`\`\`\n${lines.join('\n')}\n\`\`\`\n`
+        );
+      }
     }
   }
 }

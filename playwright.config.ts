@@ -44,7 +44,10 @@ export default defineConfig({
           'UI URL': UI_URL,
           'API URL': API_URL,
           Run: process.env.CI ? 'CI' : 'local',
-          Branch: git('rev-parse --abbrev-ref HEAD'),
+          Branch:
+            process.env.GITHUB_HEAD_REF ||
+            process.env.GITHUB_REF_NAME ||
+            git('rev-parse --abbrev-ref HEAD'),
           Commit: git('rev-parse --short HEAD'),
           Node: process.version,
           Playwright: playwrightVersion,
