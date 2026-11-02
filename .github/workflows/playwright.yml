@@ -27,8 +27,8 @@ jobs:
     needs: gate
     uses: ./.github/workflows/run-tests.yml
     with:
-      projects: --project="API" --project="UI Firefox"
-      browser: firefox
+      projects: --project="API" --project="UI Chrome"
+      browser: chromium
       grep: '@smoke'
       report-name: blob-smoke
     secrets:
@@ -53,12 +53,8 @@ jobs:
     name: UI ${{ matrix.target.browser }} ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
     strategy:
       fail-fast: false
-      # PRs run one browser, merges to main run all CI browsers.
-      # No UI Chrome on CI until the app is self-hosted: Cloudflare on the
-      # hosted demo denies headless Chromium from GitHub runner IPs on every page.
-      # Firefox and WebKit get through. Chrome still runs locally.
       matrix:
-        target: ${{ fromJSON(github.event_name == 'pull_request' && '[{"project":"UI Firefox","browser":"firefox"}]' || '[{"project":"UI Firefox","browser":"firefox"},{"project":"UI Safari","browser":"webkit"}]') }}
+        target: ${{ fromJSON(github.event_name == 'pull_request' && '[{"project":"UI Chrome","browser":"chromium"}]' || '[{"project":"UI Chrome","browser":"chromium"},{"project":"UI Firefox","browser":"firefox"},{"project":"UI Safari","browser":"webkit"}]') }}
         shardIndex: [1, 2]
         shardTotal: [2]
     uses: ./.github/workflows/run-tests.yml

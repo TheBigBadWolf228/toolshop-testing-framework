@@ -33,14 +33,16 @@ jobs:
   run:
     runs-on: ubuntu-latest
     env:
+      UI_URL: http://localhost:4200
+      API_URL: http://localhost:8091
       CUSTOMER_EMAIL: ${{ secrets.CUSTOMER_EMAIL }}
       CUSTOMER_PASSWORD: ${{ secrets.CUSTOMER_PASSWORD }}
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
     steps:
       - uses: actions/checkout@v6
-      - name: Check the API is reachable
-        run: curl -fsS -o /dev/null https://api.practicesoftwaretesting.com/brands
+      - uses: ./.github/actions/start-app
+        timeout-minutes: 10
       - uses: ./.github/actions/setup
       - name: Install Playwright Browsers
         if: ${{ inputs.browser != '' }}

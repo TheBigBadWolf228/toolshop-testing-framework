@@ -1,0 +1,28 @@
+name: Start app
+description: Toolshop app in Docker on localhost (UI 4200, API 8091), seeded and ready
+runs:
+  using: composite
+  steps:
+    - name: Start containers
+      shell: bash
+      run: docker compose -f docker/app.compose.yml up -d --quiet-pull
+    - name: Wait for the database
+      shell: bash
+      run: |
+        for i in $(seq 1 30); do
+          docker compose -f docker/app.compose.yml exec -T mariadb mysqladmin ping -h 127.0.0.1 -uroot -proot --silent && exit 0
+          sleep 2
+        done
+        exit 1
+    - name: Seed the database
+      shell: bash
+      run: docker compose -f docker/app.compose.yml exec -T laravel-api php artisan migrate:fresh --seed --force
+    - name: Wait for the API and the UI
+      shell: bash
+      run: |
+        curl -fsS -o /dev/null --retry 30 --retry-delay 2 --retry-all-errors http://localhost:8091/status
+        curl -fsS -o /dev/null --retry 60 --retry-delay 5 --retry-all-errors http://localhost:4200
+    - name: App logs
+      if: failure()
+      shell: bash
+      run: docker compose -f docker/app.compose.yml logs

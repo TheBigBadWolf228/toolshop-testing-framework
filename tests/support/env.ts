@@ -1,5 +1,7 @@
-export const UI_URL = 'https://practicesoftwaretesting.com';
-export const API_URL = 'https://api.practicesoftwaretesting.com';
+export const UI_URL =
+  process.env.UI_URL ?? 'https://practicesoftwaretesting.com';
+export const API_URL =
+  process.env.API_URL ?? 'https://api.practicesoftwaretesting.com';
 export const API_HEADERS: Record<string, string> = {
   Accept: 'application/json',
   'Content-Type': 'application/json',
