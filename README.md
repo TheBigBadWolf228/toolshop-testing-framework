@@ -1,8 +1,9 @@
 # Toolshop Testing Framework
 
-API and UI tests for the Practice Software Testing (Toolshop) app, written with
-Playwright and TypeScript. Tests run against https://practicesoftwaretesting.com
-and its API https://api.practicesoftwaretesting.com
+API and UI tests for the Practice Software Testing app, written with
+Playwright and TypeScript. By default tests run against https://practicesoftwaretesting.com
+and its API https://api.practicesoftwaretesting.com. On CI they run against
+a copy of the app in Docker.
 
 ## Stack
 
@@ -35,6 +36,26 @@ When a test fails because an API call or the browser failed, the report has
 `api-calls.md` (failed API calls with a curl to reproduce manually)
 For UI tests, `browser-log.md` has page URL, failed browser API calls and console errors.
 UI tests also get a screenshot. The curl uses $TOKEN, so paste valid one first.
+
+## Running against the app in Docker
+
+CI starts its copy of the app in Docker for every test job. The demo site
+is behind Cloudflare, which blocks browsers from GitHub runners. A fresh app per
+job also means no hourly resets and no data from other people.
+
+The same works locally:
+
+```bash
+docker compose -f docker/app.compose.yml up -d
+docker compose -f docker/app.compose.yml exec -T laravel-api php artisan migrate:fresh --seed --force
+UI_URL=http://localhost:4200 API_URL=http://localhost:8091 npm run test:all
+docker compose -f docker/app.compose.yml down -v
+```
+
+If the seed fails right after `up`, the database is still starting, run it again.
+Set `UI_URL` and `API_URL` in the shell, not in .env.
+
+On CI, pull requests run UI tests in Chrome, merges to main in Chrome, Firefox and Safari.
 
 ## API tests
 
@@ -79,7 +100,7 @@ and flaky tests stand out.
 npm run report:allure
 ```
 
-The Allure report of the latest run on main is published here:
+**The Allure report of the latest run on main is published here**:
 https://thebigbadwolf228.github.io/toolshop-testing-framework/
 
 The terminal also prints a short summary at the end of a run when there is
