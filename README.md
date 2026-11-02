@@ -79,6 +79,9 @@ and flaky tests stand out.
 npm run report:allure
 ```
 
+The Allure report of the latest run on main is published here:
+https://thebigbadwolf228.github.io/toolshop-testing-framework/
+
 The terminal also prints a short summary at the end of a run when there is
 something to know: how many known bugs still fail as expected, a known bug that
 started passing (close its issue and remove test.fail), and tests that passed
