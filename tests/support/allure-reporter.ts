@@ -1,5 +1,5 @@
 import { rmSync } from 'node:fs';
-import type { Suite, TestCase } from '@playwright/test/reporter';
+import type { Suite, TestCase, TestResult } from '@playwright/test/reporter';
 import { AllureReporter } from 'allure-playwright';
 
 export default class Reporter extends AllureReporter {
@@ -17,6 +17,19 @@ export default class Reporter extends AllureReporter {
     );
     super.onTestBegin(
       Object.create(test, { annotations: { value: annotations } })
+    );
+  }
+
+  override onTestEnd(test: TestCase, result: TestResult): Promise<void> {
+    if (!process.env.CI) {
+      return super.onTestEnd(test, result);
+    }
+    const attachments = result.attachments.filter(
+      ({ name }) => name !== 'trace'
+    );
+    return super.onTestEnd(
+      test,
+      Object.create(result, { attachments: { value: attachments } })
     );
   }
 }

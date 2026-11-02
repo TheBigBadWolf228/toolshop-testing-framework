@@ -54,3 +54,9 @@ jobs:
           name: ${{ inputs.report-name }}
           path: blob-report/
           retention-days: 1
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: allure-${{ inputs.report-name }}
+          path: allure-results/
+          retention-days: 1
