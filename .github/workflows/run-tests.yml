@@ -11,6 +11,15 @@ on:
       grep:
         type: string
         default: ''
+      grep-invert:
+        type: string
+        default: ''
+      repeat-each:
+        type: string
+        default: ''
+      fail-on-flaky-tests:
+        type: boolean
+        default: false
       shard:
         type: string
         default: ''
@@ -49,7 +58,7 @@ jobs:
         timeout-minutes: 15
         run: npx playwright install --with-deps ${{ inputs.browser }}
       - name: Run Playwright tests
-        run: npx playwright test ${{ inputs.projects }} ${{ inputs.grep && format('--grep "{0}"', inputs.grep) || '' }} ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }} ${{ inputs.workers && format('--workers={0}', inputs.workers) || '' }}
+        run: npx playwright test ${{ inputs.projects }} ${{ inputs.grep && format('--grep "{0}"', inputs.grep) || '' }} ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }} ${{ inputs.workers && format('--workers={0}', inputs.workers) || '' }} ${{ inputs.grep-invert && format('--grep-invert "{0}"', inputs.grep-invert) || '' }} ${{ inputs.repeat-each && format('--repeat-each={0}', inputs.repeat-each) || '' }} ${{ inputs.fail-on-flaky-tests && '--fail-on-flaky-tests' || '' }}
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
