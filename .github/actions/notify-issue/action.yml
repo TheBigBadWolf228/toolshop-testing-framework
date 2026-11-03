@@ -1,0 +1,34 @@
+name: Notify issue
+description: One open issue per label. A failed run opens it or comments on it, a green run closes it
+inputs:
+  label:
+    required: true
+  title:
+    required: true
+  result:
+    description: failure or success
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Open, update or close the issue
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+        LABEL: ${{ inputs.label }}
+        TITLE: ${{ inputs.title }}
+        RESULT: ${{ inputs.result }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: |
+        gh label create "$LABEL" --color d93f0b --force
+        issue=$(gh issue list --label "$LABEL" --state open --json number --jq '.[0].number')
+        if [ "$RESULT" = failure ]; then
+          if [ -n "$issue" ]; then
+            gh issue comment "$issue" --body "Still failing: $RUN_URL"
+          else
+            gh issue create --title "$TITLE" --label "$LABEL" --body "Failed: $RUN_URL"
+          fi
+        elif [ -n "$issue" ]; then
+          gh issue close "$issue" --comment "Green again: $RUN_URL"
+        fi
