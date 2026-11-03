@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main]
     paths-ignore: ['**.md', '.vscode/**']
+  workflow_dispatch:
+    inputs:
+      browsers:
+        type: choice
+        options: [all, chrome]
+        default: all
 permissions:
   contents: read
 concurrency:
@@ -54,7 +60,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: ${{ fromJSON(github.event_name == 'pull_request' && '[{"project":"UI Chrome","browser":"chromium"}]' || '[{"project":"UI Chrome","browser":"chromium"},{"project":"UI Firefox","browser":"firefox"},{"project":"UI Safari","browser":"webkit"}]') }}
+        target: ${{ fromJSON((github.event_name == 'pull_request' || inputs.browsers == 'chrome') && '[{"project":"UI Chrome","browser":"chromium"}]' || '[{"project":"UI Chrome","browser":"chromium"},{"project":"UI Firefox","browser":"firefox"},{"project":"UI Safari","browser":"webkit"}]') }}
         shardIndex: [1, 2]
         shardTotal: [2]
     uses: ./.github/workflows/run-tests.yml
