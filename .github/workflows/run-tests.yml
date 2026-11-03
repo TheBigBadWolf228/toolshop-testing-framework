@@ -49,7 +49,7 @@ jobs:
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/start-app
         timeout-minutes: 10
       - uses: ./.github/actions/setup
@@ -59,13 +59,13 @@ jobs:
         run: npx playwright install --with-deps ${{ inputs.browser }}
       - name: Run Playwright tests
         run: npx playwright test ${{ inputs.projects }} ${{ inputs.grep && format('--grep "{0}"', inputs.grep) || '' }} ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }} ${{ inputs.workers && format('--workers={0}', inputs.workers) || '' }} ${{ inputs.grep-invert && format('--grep-invert "{0}"', inputs.grep-invert) || '' }} ${{ inputs.repeat-each && format('--repeat-each={0}', inputs.repeat-each) || '' }} ${{ inputs.fail-on-flaky-tests && '--fail-on-flaky-tests' || '' }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: ${{ inputs.report-name }}
           path: blob-report/
           retention-days: 1
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: allure-${{ inputs.report-name }}
