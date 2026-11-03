@@ -1,5 +1,7 @@
 # Toolshop Testing Framework
 
+[![Playwright Tests](https://github.com/TheBigBadWolf228/toolshop-testing-framework/actions/workflows/playwright.yml/badge.svg?branch=main)](https://github.com/TheBigBadWolf228/toolshop-testing-framework/actions/workflows/playwright.yml)
+
 API and UI tests for the Practice Software Testing app, written with
 Playwright and TypeScript. By default tests run against https://practicesoftwaretesting.com
 and its API https://api.practicesoftwaretesting.com. On CI they run against
@@ -55,9 +57,11 @@ docker compose -f docker/app.compose.yml down -v
 If the seed fails right after `up`, the database is still starting, run it again.
 Set `UI_URL` and `API_URL` in the shell, not in .env.
 
-On CI, pull requests run UI tests in Chrome, merges to main in Chrome, Firefox and Safari.
-
 ## CI
+
+On CI, pull requests run UI tests in Chrome, merges to main in Chrome, Firefox and Safari.
+Main only changes through pull requests, and the `ci-ok` check has to pass before merge.
+Dependabot opens update PRs for npm packages and GitHub Actions every week.
 
 Every night at 02:20 UTC the same run starts on main and publishes the Allure report.
 Every Sunday a flake hunt runs every test 3 times, without the tests tagged @flaky, and
