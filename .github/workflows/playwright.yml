@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [main]
     paths-ignore: ['**.md', '.vscode/**']
+  schedule:
+    - cron: '20 2 * * *'
   workflow_dispatch:
     inputs:
       browsers:
@@ -110,12 +112,12 @@ jobs:
           path: allure-report/
           retention-days: 7
       - uses: actions/upload-pages-artifact@v4
-        if: ${{ github.event_name == 'push' }}
+        if: ${{ github.event_name == 'push' || github.event_name == 'schedule' }}
         with:
           path: allure-report/
   deploy:
     needs: report
-    if: ${{ !cancelled() && github.event_name == 'push' && needs.report.result == 'success' }}
+    if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'schedule') && needs.report.result == 'success' }}
     runs-on: ubuntu-latest
     permissions:
       pages: write
@@ -126,3 +128,17 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+  notify:
+    needs: [gate, smoke, api, ui, report]
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/notify-issue
+        with:
+          label: main-failure
+          title: Run on main failed
+          result: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}

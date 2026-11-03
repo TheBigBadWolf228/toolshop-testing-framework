@@ -1,0 +1,83 @@
+name: Flake Hunt
+on:
+  schedule:
+    - cron: '40 3 * * 0'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  api:
+    uses: ./.github/workflows/run-tests.yml
+    with:
+      projects: --project="API"
+      workers: '2'
+      grep-invert: '@flaky'
+      repeat-each: '3'
+      fail-on-flaky-tests: true
+      report-name: blob-api
+    secrets:
+      CUSTOMER_EMAIL: ${{ secrets.CUSTOMER_EMAIL }}
+      CUSTOMER_PASSWORD: ${{ secrets.CUSTOMER_PASSWORD }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+  ui:
+    name: UI ${{ matrix.target.browser }} ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - { project: UI Chrome, browser: chromium }
+          - { project: UI Firefox, browser: firefox }
+          - { project: UI Safari, browser: webkit }
+        shardIndex: [1, 2]
+        shardTotal: [2]
+    uses: ./.github/workflows/run-tests.yml
+    with:
+      projects: --project="${{ matrix.target.project }}"
+      browser: ${{ matrix.target.browser }}
+      shard: ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+      grep-invert: '@flaky'
+      repeat-each: '3'
+      fail-on-flaky-tests: true
+      report-name: blob-ui-${{ matrix.target.browser }}-${{ matrix.shardIndex }}
+    secrets:
+      CUSTOMER_EMAIL: ${{ secrets.CUSTOMER_EMAIL }}
+      CUSTOMER_PASSWORD: ${{ secrets.CUSTOMER_PASSWORD }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+  report:
+    needs: [api, ui]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: blob-*
+          path: all-blob-reports
+          merge-multiple: true
+      - name: Merge reports
+        run: SUMMARY_FILE="$GITHUB_STEP_SUMMARY" npx playwright merge-reports --reporter html,./tests/support/summary-reporter.ts ./all-blob-reports
+      - uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+  notify:
+    needs: [api, ui, report]
+    if: ${{ !cancelled() && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/notify-issue
+        with:
+          label: flaky-tests
+          title: Flake hunt found flaky or failing tests
+          result: ${{ contains(needs.*.result, 'failure') && 'failure' || 'success' }}
