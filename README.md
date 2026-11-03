@@ -57,6 +57,14 @@ Set `UI_URL` and `API_URL` in the shell, not in .env.
 
 On CI, pull requests run UI tests in Chrome, merges to main in Chrome, Firefox and Safari.
 
+## CI
+
+Every night at 02:20 UTC the same run starts on main and publishes the Allure report.
+Every Sunday a flake hunt runs every test 3 times, without the tests tagged @flaky, and
+fails if a test only passed on retry. When a nightly or flake hunt fails it opens a
+GitHub issue (labels `main-failure` and `flaky-tests`). Later failures comment on it, and
+the next green run closes it. Both can also be started by hand from the Actions tab.
+
 ## API tests
 
 Each resource has a client in `tests/api/clients` that sends the requests and
