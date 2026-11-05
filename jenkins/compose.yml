@@ -9,10 +9,10 @@ services:
     network_mode: host
     group_add:
       - ${DOCKER_GID:-986}
-    env_file: .env
     environment:
       JENKINS_HOME: ${PWD}/jenkins/home
     volumes:
       - ${PWD}/jenkins/home:${PWD}/jenkins/home
       - /var/run/docker.sock:/var/run/docker.sock
+      - ./secrets.properties:/run/secrets/secrets.properties:ro
     restart: unless-stopped

@@ -11,6 +11,23 @@ jenkins:
     loggedInUsersCanDoAnything:
       allowAnonymousRead: false
 
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - usernamePassword:
+              scope: GLOBAL
+              id: toolshop-customer
+              description: Seeded customer of the local app
+              username: ${CUSTOMER_EMAIL}
+              password: ${CUSTOMER_PASSWORD}
+          - usernamePassword:
+              scope: GLOBAL
+              id: toolshop-admin
+              description: Seeded admin of the local app
+              username: ${ADMIN_EMAIL}
+              password: ${ADMIN_PASSWORD}
+
 unclassified:
   location:
     url: http://localhost:8080/
