@@ -69,6 +69,24 @@ fails if a test only passed on retry. When a nightly or flake hunt fails it open
 GitHub issue (labels `main-failure` and `flaky-tests`). Later failures comment on it, and
 the next green run closes it. Both can also be started by hand from the Actions tab.
 
+### Jenkins (local)
+
+The same pipeline also runs on a local Jenkins in Docker: gate, start the app, smoke, then API
+and UI Chrome in parallel ([Jenkinsfile](Jenkinsfile)). Jenkins is set up in `jenkins/`
+
+Create `jenkins/secrets.properties` with `JENKINS_ADMIN_PASSWORD`, `CUSTOMER_EMAIL`,
+`CUSTOMER_PASSWORD`, `ADMIN_EMAIL` and `ADMIN_PASSWORD`
+then run from the repo root:
+
+```bash
+mkdir -p jenkins/home
+docker compose -f jenkins/compose.yml up -d --build
+```
+
+Open http://localhost:8080 and log in as `admin` with
+`JENKINS_ADMIN_PASSWORD` value. The job builds every branch that has a
+`Jenkinsfile` and checks GitHub every 5 minutes.
+
 ## API tests
 
 Each resource has a client in `tests/api/clients` that sends the requests and
