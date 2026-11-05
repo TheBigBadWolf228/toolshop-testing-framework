@@ -17,7 +17,14 @@ const { version: playwrightVersion } = createRequire(import.meta.url)(
 ) as { version: string };
 
 function git(args: string): string {
-  return execSync(`git ${args}`, { encoding: 'utf8' }).trim();
+  try {
+    return execSync(`git ${args}`, {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+  } catch {
+    return 'unknown';
+  }
 }
 
 export default defineConfig({

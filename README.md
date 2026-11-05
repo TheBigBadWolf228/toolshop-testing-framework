@@ -58,6 +58,30 @@ If the seed fails right after `up`, the database is still starting, run it again
 Instead of the shell you can set `UI_URL` and `API_URL` in `.env` (check `.env.example` file)
 The shell wins if both are set.
 
+## Running tests in Docker
+
+The `Dockerfile` packs the tests with Node and the browsers from the official
+Playwright image. `.env` stays out of the image and is passed at run.
+This is for local runs; CI doesn't use this image yet.
+
+```bash
+docker build -t toolshop-tests .
+mkdir -p reports
+docker run --rm --init --ipc=host --network host --env-file .env \
+  --user "$(id -u):$(id -g)" \
+  -v "$PWD/reports:/app/reports" -e PLAYWRIGHT_HTML_OUTPUT_DIR=reports/html \
+  toolshop-tests
+npx playwright show-report reports/html
+```
+
+`--network host` lets the browser in the container reach the app on localhost.
+`--ipc=host` stops Chromium from crashing on Docker's small shared memory.
+`--user` makes the report files belong to user instead of root's. Create `reports` before the
+run, otherwise Docker creates it as root.
+
+By default the container runs all tests. To run something else, put the full command
+after the image name, like: `toolshop-tests npx playwright test --project=API`.
+
 ## CI
 
 On CI, pull requests run UI tests in Chrome, merges to main in Chrome, Firefox and Safari.
