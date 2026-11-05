@@ -1,0 +1,18 @@
+# Local Jenkins. Run from the repo root: docker compose -f jenkins/compose.yml up -d --build
+# Host network: the controller's localhost is this machine (app on 4200/8091, Jenkins on 8080).
+name: toolshop-jenkins
+
+services:
+  jenkins:
+    build: .
+    container_name: jenkins
+    network_mode: host
+    group_add:
+      - ${DOCKER_GID:-986}
+    env_file: .env
+    environment:
+      JENKINS_HOME: ${PWD}/jenkins/home
+    volumes:
+      - ${PWD}/jenkins/home:${PWD}/jenkins/home
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
