@@ -1,5 +1,4 @@
 import { execSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import {
   defineConfig,
@@ -19,10 +18,6 @@ const { version: playwrightVersion } = createRequire(import.meta.url)(
 
 function git(args: string): string {
   return execSync(`git ${args}`, { encoding: 'utf8' }).trim();
-}
-
-if (existsSync('.env')) {
-  process.loadEnvFile('.env');
 }
 
 export default defineConfig({

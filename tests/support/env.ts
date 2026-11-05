@@ -1,3 +1,9 @@
+import { existsSync } from 'node:fs';
+
+if (existsSync('.env')) {
+  process.loadEnvFile('.env');
+}
+
 export const UI_URL =
   process.env.UI_URL ?? 'https://practicesoftwaretesting.com';
 export const API_URL =
