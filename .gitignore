@@ -21,3 +21,6 @@ CLAUDE.MD
 
 # Local credentials
 .env
+
+# Local Jenkins data
+/jenkins/home/

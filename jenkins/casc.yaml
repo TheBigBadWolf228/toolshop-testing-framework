@@ -1,0 +1,16 @@
+jenkins:
+  systemMessage: 'Toolshop tests: local Jenkins, configured from jenkins/casc.yaml'
+  numExecutors: 2
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: admin
+          password: ${JENKINS_ADMIN_PASSWORD}
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+unclassified:
+  location:
+    url: http://localhost:8080/
