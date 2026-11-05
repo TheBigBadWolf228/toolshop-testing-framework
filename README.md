@@ -55,7 +55,8 @@ docker compose -f docker/app.compose.yml down -v
 ```
 
 If the seed fails right after `up`, the database is still starting, run it again.
-Set `UI_URL` and `API_URL` in the shell, not in .env.
+Instead of the shell you can set `UI_URL` and `API_URL` in `.env` (check `.env.example` file)
+The shell wins if both are set.
 
 ## CI
 
