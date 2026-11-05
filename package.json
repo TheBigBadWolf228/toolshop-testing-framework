@@ -2,6 +2,9 @@
   "name": "toolshop-testing-framework",
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=26 <27"
+  },
   "description": "",
   "main": "index.js",
   "scripts": {
