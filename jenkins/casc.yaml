@@ -14,3 +14,37 @@ jenkins:
 unclassified:
   location:
     url: http://localhost:8080/
+
+jobs:
+  - script: |
+      multibranchPipelineJob('toolshop-tests') {
+        displayName('Toolshop tests')
+        branchSources {
+          branchSource {
+            source {
+              git {
+                id('toolshop-github')
+                remote('https://github.com/TheBigBadWolf228/toolshop-testing-framework.git')
+                traits {
+                  gitBranchDiscovery()
+                }
+              }
+            }
+          }
+        }
+        factory {
+          workflowBranchProjectFactory {
+            scriptPath('Jenkinsfile')
+          }
+        }
+        orphanedItemStrategy {
+          discardOldItems {
+            numToKeep(5)
+          }
+        }
+        triggers {
+          periodicFolderTrigger {
+            interval('5m')
+          }
+        }
+      }
