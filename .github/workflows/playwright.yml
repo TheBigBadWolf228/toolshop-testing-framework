@@ -56,18 +56,16 @@ jobs:
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
   ui:
     needs: smoke
-    name: UI ${{ matrix.target.browser }} ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+    name: UI ${{ matrix.target.browser }}
     strategy:
       fail-fast: false
       matrix:
         target: ${{ fromJSON((github.event_name == 'pull_request' || inputs.browsers == 'chrome') && '[{"project":"UI Chrome","browser":"chromium"}]' || '[{"project":"UI Chrome","browser":"chromium"},{"project":"UI Firefox","browser":"firefox"},{"project":"UI Safari","browser":"webkit"}]') }}
-        shardIndex: [1, 2]
-        shardTotal: [2]
     uses: ./.github/workflows/run-tests.yml
     with:
       projects: --project="${{ matrix.target.project }}"
-      shard: ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
-      report-name: blob-full-ui-${{ matrix.target.browser }}-${{ matrix.shardIndex }}
+      workers: '2'
+      report-name: blob-full-ui-${{ matrix.target.browser }}
     secrets:
       CUSTOMER_EMAIL: ${{ secrets.CUSTOMER_EMAIL }}
       CUSTOMER_PASSWORD: ${{ secrets.CUSTOMER_PASSWORD }}
