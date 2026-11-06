@@ -15,7 +15,7 @@ services:
     network_mode: host
     ipc: host
     init: true
-    user: "${UID:-1000}:${GID:-1000}"
+    user: '${UID:-1000}:${GID:-1000}'
     env_file: .env
     environment:
       UI_URL: http://localhost:4200

@@ -13,14 +13,24 @@ services:
       MYSQL_PASSWORD: root
       MYSQL_DATABASE: toolshop
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot", "--silent"]
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          '127.0.0.1',
+          '-uroot',
+          '-proot',
+          '--silent',
+        ]
       interval: 2s
       retries: 30
 
   redis:
     image: redis:7.4-alpine
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 2s
       retries: 30
 
@@ -50,7 +60,8 @@ services:
     depends_on:
       - laravel-api
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1/status"]
+      test:
+        ['CMD', 'curl', '-fsS', '-o', '/dev/null', 'http://127.0.0.1/status']
       interval: 2s
       retries: 60
 
@@ -60,6 +71,6 @@ services:
       - 4200:4200
     command: bash -c "ng serve --host 0.0.0.0 --port 4200"
     healthcheck:
-      test: ["CMD", "wget", "-qO", "/dev/null", "http://127.0.0.1:4200"]
+      test: ['CMD', 'wget', '-qO', '/dev/null', 'http://127.0.0.1:4200']
       interval: 5s
       retries: 60
