@@ -55,7 +55,6 @@ pipeline {
           done
           exit 1
         '''
-        sh '$APP exec -T laravel-api php artisan migrate:fresh --seed --force'
         sh '''
           curl -fsS -o /dev/null --retry 30 --retry-delay 2 --retry-all-errors $API_URL/status
           curl -fsS -o /dev/null --retry 60 --retry-delay 5 --retry-all-errors $UI_URL

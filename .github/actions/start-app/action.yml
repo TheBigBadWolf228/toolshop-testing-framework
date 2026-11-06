@@ -14,9 +14,6 @@ runs:
           sleep 2
         done
         exit 1
-    - name: Seed the database
-      shell: bash
-      run: docker compose -f docker/app.compose.yml exec -T laravel-api php artisan migrate:fresh --seed --force
     - name: Wait for the API and the UI
       shell: bash
       run: |
