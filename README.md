@@ -72,7 +72,8 @@ It builds the `Dockerfile` (Node and browsers from the official Playwright image
 and runs `npx playwright test`. `.env` stays out of the image and is passed at run,
 the URLs always point to the local app.
 Create `reports` before the run, otherwise Docker creates it as root.
-This is for local runs; CI doesn't use this image yet.
+CI uses the same image: every test job builds it and runs the tests with
+`docker compose run`, so CI and local runs work the same way.
 
 To run something else, put the command after `tests`, like:
 `docker compose run --rm --build tests npx playwright test --project=API`.

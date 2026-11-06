@@ -28,6 +28,10 @@ jobs:
         run: npm run format:check
       - name: Check types
         run: npm run typecheck
+      - name: Check Playwright image version
+        run: |
+          v=$(node -p "require('@playwright/test/package.json').version")
+          grep -q "mcr.microsoft.com/playwright:v$v-noble" Dockerfile || { echo "::error file=Dockerfile::Use mcr.microsoft.com/playwright:v$v-noble to match package-lock.json"; exit 1; }
       - name: Check tests load
         run: npx playwright test --list --reporter=list
   smoke:
