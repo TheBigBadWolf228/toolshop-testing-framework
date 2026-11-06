@@ -12,6 +12,10 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: root
       MYSQL_DATABASE: toolshop
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot", "--silent"]
+      interval: 2s
+      retries: 30
 
   laravel-api:
     image: testsmith/practice-software-testing-sprint5-api:2.5
@@ -20,8 +24,10 @@ services:
       DB_HOST: mariadb
       DB_PORT: 3306
       host: localhost
+    command: sh -c "php artisan migrate:fresh --seed --force && php-fpm"
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
 
   web:
     image: nginx:1.23.3-alpine
@@ -31,9 +37,17 @@ services:
       - 8091:80
     depends_on:
       - laravel-api
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1/status"]
+      interval: 2s
+      retries: 60
 
   angular-ui:
     image: testsmith/practice-software-testing-sprint5-ui:2.5
     ports:
       - 4200:4200
     command: bash -c "ng serve --host 0.0.0.0 --port 4200"
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://127.0.0.1:4200"]
+      interval: 5s
+      retries: 60

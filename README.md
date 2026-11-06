@@ -48,13 +48,12 @@ job also means no hourly resets and no data from other people.
 The same works locally:
 
 ```bash
-docker compose -f docker/app.compose.yml up -d
-docker compose -f docker/app.compose.yml exec -T laravel-api php artisan migrate:fresh --seed --force
+docker compose -f docker/app.compose.yml up -d --wait
 UI_URL=http://localhost:4200 API_URL=http://localhost:8091 npm run test:all
 docker compose -f docker/app.compose.yml down -v
 ```
 
-If the seed fails right after `up`, the database is still starting, run it again.
+`--wait` returns when the app is seeded and ready (healthchecks in the compose file).
 Instead of the shell you can set `UI_URL` and `API_URL` in `.env` (check `.env.example` file)
 The shell wins if both are set.
 
