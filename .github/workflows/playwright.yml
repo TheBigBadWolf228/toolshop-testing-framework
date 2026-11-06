@@ -35,7 +35,6 @@ jobs:
     uses: ./.github/workflows/run-tests.yml
     with:
       projects: --project="API" --project="UI Chrome"
-      browser: chromium
       grep: '@smoke'
       report-name: blob-smoke
     secrets:
@@ -67,7 +66,6 @@ jobs:
     uses: ./.github/workflows/run-tests.yml
     with:
       projects: --project="${{ matrix.target.project }}"
-      browser: ${{ matrix.target.browser }}
       shard: ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
       report-name: blob-full-ui-${{ matrix.target.browser }}-${{ matrix.shardIndex }}
     secrets:
