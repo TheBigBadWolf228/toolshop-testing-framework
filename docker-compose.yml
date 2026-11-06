@@ -1,0 +1,25 @@
+name: toolshop
+
+include:
+  - docker/app.compose.yml
+
+services:
+  tests:
+    build: .
+    profiles: [tests]
+    depends_on:
+      web:
+        condition: service_healthy
+      angular-ui:
+        condition: service_healthy
+    network_mode: host
+    ipc: host
+    init: true
+    user: '${UID:-1000}:${GID:-1000}'
+    env_file: .env
+    environment:
+      UI_URL: http://localhost:4200
+      API_URL: http://localhost:8091
+      PLAYWRIGHT_HTML_OUTPUT_DIR: reports/html
+    volumes:
+      - ./reports:/app/reports

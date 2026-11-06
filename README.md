@@ -48,39 +48,34 @@ job also means no hourly resets and no data from other people.
 The same works locally:
 
 ```bash
-docker compose -f docker/app.compose.yml up -d
-docker compose -f docker/app.compose.yml exec -T laravel-api php artisan migrate:fresh --seed --force
+docker compose -f docker/app.compose.yml up -d --wait
 UI_URL=http://localhost:4200 API_URL=http://localhost:8091 npm run test:all
 docker compose -f docker/app.compose.yml down -v
 ```
 
-If the seed fails right after `up`, the database is still starting, run it again.
+`--wait` returns when the app is seeded and ready (healthchecks in the compose file).
 Instead of the shell you can set `UI_URL` and `API_URL` in `.env` (check `.env.example` file)
 The shell wins if both are set.
 
 ## Running tests in Docker
 
-The `Dockerfile` packs the tests with Node and the browsers from the official
-Playwright image. `.env` stays out of the image and is passed at run.
-This is for local runs; CI doesn't use this image yet.
+One command starts the app, waits until it's ready, runs all tests in a container
+and removes everything after:
 
 ```bash
-docker build -t toolshop-tests .
-mkdir -p reports
-docker run --rm --init --ipc=host --network host --env-file .env \
-  --user "$(id -u):$(id -g)" \
-  -v "$PWD/reports:/app/reports" -e PLAYWRIGHT_HTML_OUTPUT_DIR=reports/html \
-  toolshop-tests
+mkdir -p reports && docker compose run --rm --build tests; s=$?; docker compose down -v; echo "tests exit: $s"
 npx playwright show-report reports/html
 ```
 
-`--network host` lets the browser in the container reach the app on localhost.
-`--ipc=host` stops Chromium from crashing on Docker's small shared memory.
-`--user` makes the report files belong to user instead of root's. Create `reports` before the
-run, otherwise Docker creates it as root.
+`docker-compose.yml` adds a `tests` service to the app from `docker/app.compose.yml`.
+It builds the `Dockerfile` (Node and browsers from the official Playwright image)
+and runs `npx playwright test`. `.env` stays out of the image and is passed at run,
+the URLs always point to the local app.
+Create `reports` before the run, otherwise Docker creates it as root.
+This is for local runs; CI doesn't use this image yet.
 
-By default the container runs all tests. To run something else, put the full command
-after the image name, like: `toolshop-tests npx playwright test --project=API`.
+To run something else, put the command after `tests`, like:
+`docker compose run --rm --build tests npx playwright test --project=API`.
 
 ## CI
 
