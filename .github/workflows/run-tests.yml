@@ -45,10 +45,15 @@ jobs:
       ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
     steps:
       - uses: actions/checkout@v7
+      - name: Start app and build test image
+        timeout-minutes: 10
+        run: |
+          docker compose up -d --quiet-pull &
+          app=$!
+          docker compose build tests
+          wait $app
       - uses: ./.github/actions/start-app
         timeout-minutes: 10
-      - name: Build test image
-        run: docker compose build tests
       - name: Run Playwright tests
         run: |
           mkdir -p reports
