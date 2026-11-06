@@ -17,6 +17,13 @@ services:
       interval: 2s
       retries: 30
 
+  redis:
+    image: redis:7.4-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      retries: 30
+
   laravel-api:
     image: testsmith/practice-software-testing-sprint5-api:2.5
     environment:
@@ -24,9 +31,14 @@ services:
       DB_HOST: mariadb
       DB_PORT: 3306
       host: localhost
+      CACHE_DRIVER: redis
+      REDIS_CLIENT: predis
+      REDIS_HOST: redis
     command: sh -c "php artisan migrate:fresh --seed --force && php-fpm"
     depends_on:
       mariadb:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   web:

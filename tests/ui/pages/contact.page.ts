@@ -33,7 +33,7 @@ export class ContactPage {
     this.email = page.getByRole('textbox', { name: 'Email address' });
     this.subject = page.getByRole('combobox', { name: 'Subject' });
     this.message = page.getByRole('textbox', { name: 'Message' });
-    this.sendButton = page.getByRole('button', { name: 'Send' });
+    this.sendButton = page.getByRole('button', { name: 'Send', exact: true });
     this.errors = page.getByRole('alert');
     this.sentAlert = page
       .getByRole('alert')
