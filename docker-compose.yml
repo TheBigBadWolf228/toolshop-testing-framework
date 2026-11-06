@@ -6,6 +6,7 @@ include:
 services:
   tests:
     build: .
+    image: toolshop-tests
     profiles: [tests]
     depends_on:
       web:
@@ -16,10 +17,22 @@ services:
     ipc: host
     init: true
     user: '${UID:-1000}:${GID:-1000}'
-    env_file: .env
+    env_file:
+      - path: .env
+        required: false
     environment:
       UI_URL: http://localhost:4200
       API_URL: http://localhost:8091
       PLAYWRIGHT_HTML_OUTPUT_DIR: reports/html
+      PLAYWRIGHT_BLOB_OUTPUT_DIR: reports/blob-report
+      ALLURE_RESULTS_DIR: reports/allure-results
+      CI:
+      GITHUB_REF_NAME:
+      GITHUB_HEAD_REF:
+      GITHUB_SHA:
+      CUSTOMER_EMAIL:
+      CUSTOMER_PASSWORD:
+      ADMIN_EMAIL:
+      ADMIN_PASSWORD:
     volumes:
       - ./reports:/app/reports

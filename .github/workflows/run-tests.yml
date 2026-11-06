@@ -5,9 +5,6 @@ on:
       projects:
         type: string
         required: true
-      browser:
-        type: string
-        default: ''
       grep:
         type: string
         default: ''
@@ -42,8 +39,6 @@ jobs:
   run:
     runs-on: ubuntu-latest
     env:
-      UI_URL: http://localhost:4200
-      API_URL: http://localhost:8091
       CUSTOMER_EMAIL: ${{ secrets.CUSTOMER_EMAIL }}
       CUSTOMER_PASSWORD: ${{ secrets.CUSTOMER_PASSWORD }}
       ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
@@ -52,22 +47,21 @@ jobs:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/start-app
         timeout-minutes: 10
-      - uses: ./.github/actions/setup
-      - name: Install Playwright Browsers
-        if: ${{ inputs.browser != '' }}
-        timeout-minutes: 15
-        run: npx playwright install --with-deps ${{ inputs.browser }}
+      - name: Build test image
+        run: docker compose build tests
       - name: Run Playwright tests
-        run: npx playwright test ${{ inputs.projects }} ${{ inputs.grep && format('--grep "{0}"', inputs.grep) || '' }} ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }} ${{ inputs.workers && format('--workers={0}', inputs.workers) || '' }} ${{ inputs.grep-invert && format('--grep-invert "{0}"', inputs.grep-invert) || '' }} ${{ inputs.repeat-each && format('--repeat-each={0}', inputs.repeat-each) || '' }} ${{ inputs.fail-on-flaky-tests && '--fail-on-flaky-tests' || '' }}
+        run: |
+          mkdir -p reports
+          docker compose run --rm --no-deps --user "$(id -u):$(id -g)" tests npx playwright test ${{ inputs.projects }} ${{ inputs.grep && format('--grep "{0}"', inputs.grep) || '' }} ${{ inputs.shard && format('--shard={0}', inputs.shard) || '' }} ${{ inputs.workers && format('--workers={0}', inputs.workers) || '' }} ${{ inputs.grep-invert && format('--grep-invert "{0}"', inputs.grep-invert) || '' }} ${{ inputs.repeat-each && format('--repeat-each={0}', inputs.repeat-each) || '' }} ${{ inputs.fail-on-flaky-tests && '--fail-on-flaky-tests' || '' }}
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: ${{ inputs.report-name }}
-          path: blob-report/
+          path: reports/blob-report/
           retention-days: 1
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: allure-${{ inputs.report-name }}
-          path: allure-results/
+          path: reports/allure-results/
           retention-days: 1

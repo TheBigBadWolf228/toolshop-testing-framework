@@ -37,7 +37,6 @@ jobs:
     uses: ./.github/workflows/run-tests.yml
     with:
       projects: --project="${{ matrix.target.project }}"
-      browser: ${{ matrix.target.browser }}
       shard: ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
       grep-invert: '@flaky'
       repeat-each: '3'

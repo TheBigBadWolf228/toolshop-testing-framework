@@ -40,7 +40,7 @@ export default defineConfig({
     [
       './tests/support/allure-reporter.ts',
       {
-        resultsDir: 'allure-results',
+        resultsDir: process.env.ALLURE_RESULTS_DIR ?? 'allure-results',
         detail: false,
         environmentInfo: {
           'UI URL': UI_URL,
@@ -50,7 +50,9 @@ export default defineConfig({
             process.env.GITHUB_HEAD_REF ||
             process.env.GITHUB_REF_NAME ||
             git('rev-parse --abbrev-ref HEAD'),
-          Commit: git('rev-parse --short HEAD'),
+          Commit:
+            process.env.GITHUB_SHA?.slice(0, 7) ??
+            git('rev-parse --short HEAD'),
           Node: process.version,
           Playwright: playwrightVersion,
         },
