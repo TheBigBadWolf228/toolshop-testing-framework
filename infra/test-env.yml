@@ -16,6 +16,12 @@ Parameters:
     Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
 
 Resources:
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /toolshop/${AWS::StackName}
+      RetentionInDays: 1
+
   Role:
     Type: AWS::IAM::Role
     Properties:
@@ -28,6 +34,16 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Policies:
+        - PolicyName: write-container-logs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !GetAtt LogGroup.Arn
 
   Profile:
     Type: AWS::IAM::InstanceProfile
@@ -79,7 +95,7 @@ Resources:
           git clone https://github.com/TheBigBadWolf228/toolshop-testing-framework.git /opt/toolshop
           cd /opt/toolshop
           git checkout ${GitRef}
-          docker compose -f docker/app.compose.yml up -d --wait
+          AWS_LOG_GROUP=${LogGroup} docker compose -f docker/app.compose.yml -f docker/app.aws.yml up -d --wait
 
           /opt/aws/bin/cfn-signal -e 0 --stack ${AWS::StackName} --resource Machine --region ${AWS::Region}
 
