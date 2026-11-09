@@ -1,0 +1,88 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Throwaway Toolshop test environment on one EC2 machine, reached through SSM.
+
+Parameters:
+  GitRef:
+    Type: String
+    Default: main
+  InstanceType:
+    Type: String
+    Default: c7i-flex.large
+  LifetimeMinutes:
+    Type: Number
+    Default: 60
+  ImageId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+
+Resources:
+  Role:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+
+  Profile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref Role
+
+  Firewall:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: No inbound traffic, access is through SSM only
+
+  Machine:
+    Type: AWS::EC2::Instance
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT15M
+    Properties:
+      ImageId: !Ref ImageId
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref Profile
+      InstanceInitiatedShutdownBehavior: terminate
+      SecurityGroupIds:
+        - !GetAtt Firewall.GroupId
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeType: gp3
+            VolumeSize: 20
+            DeleteOnTermination: true
+      Tags:
+        - Key: Name
+          Value: !Ref AWS::StackName
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euxo pipefail
+          # Before anything else can fail: a forgotten machine must still die.
+          shutdown -h +${LifetimeMinutes}
+          trap '/opt/aws/bin/cfn-signal -e 1 --stack ${AWS::StackName} --resource Machine --region ${AWS::Region}' ERR
+
+          dnf install -y docker git aws-cfn-bootstrap
+          mkdir -p /usr/local/lib/docker/cli-plugins
+          curl -fsSL https://github.com/docker/compose/releases/download/v5.6.1/docker-compose-linux-x86_64 \
+            -o /usr/local/lib/docker/cli-plugins/docker-compose
+          chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+          systemctl enable --now docker
+
+          git clone https://github.com/TheBigBadWolf228/toolshop-testing-framework.git /opt/toolshop
+          cd /opt/toolshop
+          git checkout ${GitRef}
+          docker compose -f docker/app.compose.yml up -d --wait
+
+          /opt/aws/bin/cfn-signal -e 0 --stack ${AWS::StackName} --resource Machine --region ${AWS::Region}
+
+Outputs:
+  InstanceId:
+    Value: !Ref Machine
