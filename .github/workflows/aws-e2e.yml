@@ -17,18 +17,50 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: eu-north-1
       STACK: toolshop-e2e-${{ github.run_id }}
+      CUSTOMER_EMAIL: ${{ secrets.CUSTOMER_EMAIL }}
+      CUSTOMER_PASSWORD: ${{ secrets.CUSTOMER_PASSWORD }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
     steps:
       - uses: actions/checkout@v7
-      - name: Check tools
-        run: |
-          aws --version
-          session-manager-plugin --version || echo "session-manager-plugin missing"
-      - name: Create test environment
+      - name: Create test environment and build test image
         timeout-minutes: 15
         run: |
           aws cloudformation create-stack --stack-name "$STACK" --template-body file://infra/test-env.yml \
             --capabilities CAPABILITY_IAM --parameters ParameterKey=GitRef,ParameterValue=${{ github.sha }}
+          docker compose build tests
           aws cloudformation wait stack-create-complete --stack-name "$STACK"
+      - name: Open tunnels to the app
+        run: |
+          ID=$(aws cloudformation describe-stacks --stack-name "$STACK" \
+            --query "Stacks[0].Outputs[?OutputKey=='InstanceId'].OutputValue" --output text)
+          for port in 4200 8091; do
+            aws ssm start-session --target "$ID" --document-name AWS-StartPortForwardingSession \
+              --parameters "{\"portNumber\":[\"$port\"],\"localPortNumber\":[\"$port\"]}" > "tunnel-$port.log" 2>&1 &
+          done
+          timeout 60 bash -c 'until curl -fs -o /dev/null localhost:4200 && curl -fs -o /dev/null localhost:8091/status; do sleep 2; done'
+      - name: Run smoke tests
+        run: |
+          mkdir -p reports
+          docker compose run --rm --no-deps --user "$(id -u):$(id -g)" tests \
+            npm run test:smoke -- --workers=1 --reporter=html,github
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: aws-playwright-report
+          path: reports/html/
+          retention-days: 7
+      - name: Save app logs
+        if: failure()
+        run: aws logs tail "/toolshop/$STACK" --since 1h --format short > app-logs.txt
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: aws-app-logs
+          path: |
+            app-logs.txt
+            tunnel-*.log
+          retention-days: 7
       - name: Delete test environment
         if: always()
         run: |
