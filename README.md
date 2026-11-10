@@ -90,6 +90,15 @@ fails if a test only passed on retry. When a nightly or flake hunt fails it open
 GitHub issue (labels `main-failure` and `flaky-tests`). Later failures comment on it, and
 the next green run closes it. Both can also be started by hand from the Actions tab.
 
+### AWS run
+
+The smoke tests can also run against the app on a AWS machine.
+Start it from the Actions tab (AWS E2E → Run workflow) or with
+`gh workflow run aws-e2e.yml --ref <branch>`. The job creates the stack from
+`infra/test-env.yml`, runs smoke through SSM tunnels and deletes the stack at
+the end, also when tests fail. While it runs, the app logs are in CloudWatch.
+The CI user and its permissions are in `infra/ci-access.yml`.
+
 ### Jenkins (local)
 
 The same pipeline also runs on a local Jenkins in Docker: gate, start the app, smoke, then API

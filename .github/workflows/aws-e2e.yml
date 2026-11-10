@@ -1,8 +1,6 @@
 name: AWS E2E
 on:
   workflow_dispatch:
-  push:
-    branches: [ci-run-against-aws-environment]
 permissions:
   contents: read
 concurrency:
