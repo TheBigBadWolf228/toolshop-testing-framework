@@ -92,12 +92,31 @@ the next green run closes it. Both can also be started by hand from the Actions 
 
 ### AWS run
 
-The smoke tests can also run against the app on a AWS machine.
+The smoke tests can also run against the app on an AWS machine.
 Start it from the Actions tab (AWS E2E → Run workflow) or with
-`gh workflow run aws-e2e.yml --ref <branch>`. The job creates the stack from
-`infra/test-env.yml`, runs smoke through SSM tunnels and deletes the stack at
-the end, also when tests fail. While it runs, the app logs are in CloudWatch.
-The CI user and its permissions are in `infra/ci-access.yml`.
+`gh workflow run aws-e2e.yml --ref <branch>`. The CI user and its permissions
+are in `infra/ci-access.yml`.
+
+The job creates a stack from `infra/test-env.yml`: one EC2 machine
+(`c7i-flex.large`, `eu-north-1`) that starts the app with compose. The machine
+has no open ports. The job opens SSM tunnels to ports 4200 and 8091 and runs
+smoke tests.
+
+At the end the job deletes the stack, also when tests fail, so nothing is left
+in the account. If that step never runs, the machine terminates itself after
+60 minutes.
+
+While the job runs, the app logs are in CloudWatch, log group
+`/toolshop/toolshop-e2e-<run id>`.
+Failed requests in Logs Insights:
+
+```
+fields @timestamp, @logStream, @message
+| filter @message like /" 500 /
+```
+
+The account is on the AWS free
+plan until 2027-05-09; after that the workflow needs a paid account.
 
 ### Jenkins (local)
 
