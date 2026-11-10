@@ -1,0 +1,36 @@
+name: AWS E2E
+on:
+  workflow_dispatch:
+  push:
+    branches: [ci-run-against-aws-environment]
+permissions:
+  contents: read
+concurrency:
+  group: aws-e2e
+  cancel-in-progress: false
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: eu-north-1
+      STACK: toolshop-e2e-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check tools
+        run: |
+          aws --version
+          session-manager-plugin --version || echo "session-manager-plugin missing"
+      - name: Create test environment
+        timeout-minutes: 15
+        run: |
+          aws cloudformation create-stack --stack-name "$STACK" --template-body file://infra/test-env.yml \
+            --capabilities CAPABILITY_IAM --parameters ParameterKey=GitRef,ParameterValue=${{ github.sha }}
+          aws cloudformation wait stack-create-complete --stack-name "$STACK"
+      - name: Delete test environment
+        if: always()
+        run: |
+          aws cloudformation delete-stack --stack-name "$STACK"
+          aws cloudformation wait stack-delete-complete --stack-name "$STACK"
