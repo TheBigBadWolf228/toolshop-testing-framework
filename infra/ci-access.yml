@@ -1,0 +1,158 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CI user for the AWS E2E workflow. It can only manage toolshop-e2e-* test environments.
+
+Resources:
+  Boundary:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: toolshop-e2e-boundary
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: SsmAgent
+            Effect: Allow
+            Action:
+              - ssm:DescribeAssociation
+              - ssm:GetDeployablePatchSnapshotForInstance
+              - ssm:GetDocument
+              - ssm:DescribeDocument
+              - ssm:GetManifest
+              - ssm:GetParameter
+              - ssm:GetParameters
+              - ssm:ListAssociations
+              - ssm:ListInstanceAssociations
+              - ssm:PutInventory
+              - ssm:PutComplianceItems
+              - ssm:PutConfigurePackageResult
+              - ssm:UpdateAssociationStatus
+              - ssm:UpdateInstanceAssociationStatus
+              - ssm:UpdateInstanceInformation
+              - ssmmessages:*
+              - ec2messages:*
+            Resource: '*'
+          - Sid: WriteAppLogs
+            Effect: Allow
+            Action:
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/toolshop/toolshop-e2e-*
+
+  CiPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: toolshop-e2e-ci
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: OwnStacksOnly
+            Effect: Allow
+            Action:
+              - cloudformation:CreateStack
+              - cloudformation:DeleteStack
+              - cloudformation:DescribeStacks
+              - cloudformation:DescribeStackEvents
+            Resource: !Sub arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/toolshop-e2e-*/*
+          - Sid: AmiLookup
+            Effect: Allow
+            Action: ssm:GetParameters
+            Resource: !Sub arn:aws:ssm:${AWS::Region}::parameter/aws/service/ami-amazon-linux-latest/*
+          - Sid: RolesOnlyWithBoundary
+            Effect: Allow
+            Action:
+              - iam:CreateRole
+              - iam:PutRolePolicy
+              - iam:AttachRolePolicy
+            Resource: !Sub arn:aws:iam::${AWS::AccountId}:role/toolshop-e2e-*
+            Condition:
+              StringEquals:
+                iam:PermissionsBoundary: !Ref Boundary
+          - Sid: RoleHousekeeping
+            Effect: Allow
+            Action:
+              - iam:GetRole
+              - iam:GetRolePolicy
+              - iam:DeleteRole
+              - iam:DeleteRolePolicy
+              - iam:DetachRolePolicy
+              - iam:TagRole
+            Resource: !Sub arn:aws:iam::${AWS::AccountId}:role/toolshop-e2e-*
+          - Sid: PassRoleToEc2Only
+            Effect: Allow
+            Action: iam:PassRole
+            Resource: !Sub arn:aws:iam::${AWS::AccountId}:role/toolshop-e2e-*
+            Condition:
+              StringEquals:
+                iam:PassedToService: ec2.amazonaws.com
+          - Sid: InstanceProfile
+            Effect: Allow
+            Action:
+              - iam:CreateInstanceProfile
+              - iam:DeleteInstanceProfile
+              - iam:GetInstanceProfile
+              - iam:AddRoleToInstanceProfile
+              - iam:RemoveRoleFromInstanceProfile
+            Resource: !Sub arn:aws:iam::${AWS::AccountId}:instance-profile/toolshop-e2e-*
+          - Sid: Ec2InRegion
+            Effect: Allow
+            Action:
+              - ec2:Describe*
+              - ec2:CreateSecurityGroup
+              - ec2:CreateTags
+              - ec2:RunInstances
+            Resource: '*'
+            Condition:
+              StringEquals:
+                aws:RequestedRegion: !Ref AWS::Region
+          - Sid: OneInstanceType
+            Effect: Deny
+            Action: ec2:RunInstances
+            Resource: arn:aws:ec2:*:*:instance/*
+            Condition:
+              StringNotEquals:
+                ec2:InstanceType: c7i-flex.large
+          - Sid: DeleteOnlyOwnEc2
+            Effect: Allow
+            Action:
+              - ec2:TerminateInstances
+              - ec2:DeleteSecurityGroup
+            Resource: '*'
+            Condition:
+              StringLike:
+                aws:ResourceTag/aws:cloudformation:stack-name: toolshop-e2e-*
+          - Sid: OwnLogGroups
+            Effect: Allow
+            Action:
+              - logs:CreateLogGroup
+              - logs:DeleteLogGroup
+              - logs:PutRetentionPolicy
+              - logs:FilterLogEvents
+              - logs:TagResource
+            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/toolshop/toolshop-e2e-*
+          - Sid: DescribeLogGroups
+            Effect: Allow
+            Action: logs:DescribeLogGroups
+            Resource: '*'
+          - Sid: TunnelsToOwnInstances
+            Effect: Allow
+            Action: ssm:StartSession
+            Resource: !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/*
+            Condition:
+              StringLike:
+                ssm:resourceTag/aws:cloudformation:stack-name: toolshop-e2e-*
+          - Sid: PortForwardingOnly
+            Effect: Allow
+            Action: ssm:StartSession
+            Resource: !Sub arn:aws:ssm:${AWS::Region}::document/AWS-StartPortForwardingSession
+          - Sid: OwnSessions
+            Effect: Allow
+            Action:
+              - ssm:TerminateSession
+              - ssm:ResumeSession
+            Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:session/${!aws:username}-*
+
+  CiUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: toolshop-e2e-ci
+      ManagedPolicyArns:
+        - !Ref CiPolicy
