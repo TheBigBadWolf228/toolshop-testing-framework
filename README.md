@@ -107,7 +107,7 @@ in the account. If that step never runs, the machine terminates itself after
 60 minutes.
 
 While the job runs, the app logs are in CloudWatch, log group
-`/toolshop/toolshop-e2e-<run id>`
+`/toolshop/toolshop-e2e-<run id>`.
 Failed requests in Logs Insights:
 
 ```
