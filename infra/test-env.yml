@@ -34,6 +34,7 @@ Resources:
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      PermissionsBoundary: !Sub arn:aws:iam::${AWS::AccountId}:policy/toolshop-e2e-boundary
       Policies:
         - PolicyName: write-container-logs
           PolicyDocument:
