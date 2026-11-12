@@ -3,15 +3,15 @@ import { PRODUCTS } from './products.js';
 const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://localhost:11434';
 
 export type AssistantReply = {
-  answer: string;
-  products: { name: string; price: number }[];
   refused: boolean;
+  products: { name: string; price: number }[];
+  answer: string;
 };
 
 export const REPLY_SCHEMA = {
   type: 'object',
   properties: {
-    answer: { type: 'string' },
+    refused: { type: 'boolean' },
     products: {
       type: 'array',
       items: {
@@ -20,15 +20,15 @@ export const REPLY_SCHEMA = {
         required: ['name', 'price'],
       },
     },
-    refused: { type: 'boolean' },
+    answer: { type: 'string' },
   },
-  required: ['answer', 'products', 'refused'],
+  required: ['refused', 'products', 'answer'],
 } as const;
 
 const SYSTEM_PROMPT = `You are the Toolshop product assistant.
 Answer only from the product list below. Never invent products or prices.
-If the asked product is not in the list, say so and leave "products" empty.
-If the question is not about Toolshop products, set "refused" to true and leave "products" empty.
+Any question not about tools or this shop (geography, math, etc.): refused=true, products=[].
+An unknown product is NOT a refusal: refused=false, products=[], and say it is not in the list.
 "products" holds every listed product your answer mentions, with its exact name and price.
 
 Product list:
