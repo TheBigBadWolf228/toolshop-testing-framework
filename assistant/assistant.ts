@@ -1,9 +1,10 @@
 import { PRODUCTS } from './products.js';
 
 const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://localhost:11434';
+const MODEL = process.env.OLLAMA_MODEL ?? 'qwen2.5:1.5b';
 
 export type AssistantReply = {
-  refused: boolean;
+  offTopic: boolean;
   products: { name: string; price: number }[];
   answer: string;
 };
@@ -11,7 +12,7 @@ export type AssistantReply = {
 export const REPLY_SCHEMA = {
   type: 'object',
   properties: {
-    refused: { type: 'boolean' },
+    offTopic: { type: 'boolean' },
     products: {
       type: 'array',
       items: {
@@ -22,26 +23,23 @@ export const REPLY_SCHEMA = {
     },
     answer: { type: 'string' },
   },
-  required: ['refused', 'products', 'answer'],
+  required: ['offTopic', 'products', 'answer'],
 } as const;
 
 const SYSTEM_PROMPT = `You are the Toolshop product assistant.
 Answer only from the product list below. Never invent products or prices.
-Any question not about tools or this shop (geography, math, etc.): refused=true, products=[].
-An unknown product is NOT a refusal: refused=false, products=[], and say it is not in the list.
+If the question is not about tools or this shop (geography, math, etc.), set "offTopic" to true and leave "products" empty.
+If the asked product is not in the list, say so and leave "products" empty.
 "products" holds every listed product your answer mentions, with its exact name and price.
 
 Product list:
 ${PRODUCTS.map((p) => `- ${p.name} | ${p.category} | $${p.price}`).join('\n')}`;
 
-export async function askAssistant(
-  question: string,
-  model: string
-): Promise<AssistantReply> {
+export async function askAssistant(question: string): Promise<AssistantReply> {
   const response = await fetch(`${OLLAMA_URL}/api/chat`, {
     method: 'POST',
     body: JSON.stringify({
-      model,
+      model: MODEL,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: question },
