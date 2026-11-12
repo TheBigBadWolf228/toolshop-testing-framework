@@ -1,28 +1,24 @@
-import type { Assertion, TestCase } from 'promptfoo';
+import type { TestCase } from 'promptfoo';
 import { PRODUCTS } from '../assistant/products.js';
 import { GOLDEN, GOLDEN_VERSION, type GoldenCase } from './data/golden.js';
 
-const CHECKS = 'file://assertions.ts';
-
 function toTestCase(c: GoldenCase): TestCase {
-  const topic: Assertion = {
-    type: c.knownFailure ? 'not-javascript' : 'javascript',
-    value: `${CHECKS}:topic`,
-    config: { topic: c.topic },
-  };
-  const mentions = (c.products ?? []).map(
-    (name): Assertion => ({
-      type: 'javascript',
-      value: `${CHECKS}:mentions`,
-      config: { name, price: PRODUCTS.find((p) => p.name === name)!.price },
-    })
+  const products = (c.products ?? []).map((name) =>
+    PRODUCTS.find((p) => p.name === name)!
   );
   return {
     description: c.knownFailure
       ? `[known failure] ${c.id}: ${c.knownFailure}`
       : c.id,
     vars: { question: c.question },
-    assert: [topic, ...mentions],
+    assert: [
+      {
+        type: c.knownFailure ? 'not-javascript' : 'javascript',
+        value: 'file://assertions.ts:expected',
+        config: { topic: c.topic, products },
+        metric: 'expected',
+      },
+    ],
     metadata: {
       id: c.id,
       category: c.category,

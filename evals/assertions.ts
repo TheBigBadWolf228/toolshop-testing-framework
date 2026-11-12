@@ -43,3 +43,21 @@ export function mentions(
     `${name} $${price}: cited ${cited}, in answer ${said}`
   );
 }
+
+export function expected(
+  output: string,
+  context: AssertionValueFunctionContext
+): GradingResult {
+  const { topic: expectedTopic, products } = context.config as {
+    topic: Topic;
+    products: { name: string; price: number }[];
+  };
+  const checks = [
+    topic(output, { ...context, config: { topic: expectedTopic } }),
+    ...products.map((p) => mentions(output, { ...context, config: p })),
+  ];
+  return result(
+    checks.every((c) => c.pass),
+    checks.map((c) => c.reason).join('; ')
+  );
+}
