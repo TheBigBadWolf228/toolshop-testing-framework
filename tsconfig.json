@@ -11,6 +11,7 @@
     "target": "esnext",
     "types": ["node"],
     "lib": ["esnext"],
+    "resolveJsonModule": true,
 
     // Other Outputs
     "sourceMap": true,

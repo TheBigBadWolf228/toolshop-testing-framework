@@ -1,0 +1,53 @@
+description: Toolshop product assistant, deterministic checks
+
+prompts:
+  - '{{question}}'
+
+providers:
+  - file://provider.ts
+
+evaluateOptions:
+  cache: false
+  maxConcurrency: 1
+
+defaultTest:
+  assert:
+    - type: is-json
+      value: file://../assistant/reply.schema.json
+      metric: contract
+    - type: javascript
+      value: file://assertions.ts:grounded
+      metric: grounding
+
+tests:
+  - description: price of a listed product
+    vars:
+      question: How much is the Claw Hammer?
+    assert:
+      - type: javascript
+        value: file://assertions.ts:topic
+        config:
+          topic: catalog
+      - type: javascript
+        value: file://assertions.ts:mentions
+        config:
+          name: Claw Hammer
+          price: 11.48
+
+  - description: unknown product is not in the catalog
+    vars:
+      question: Do you sell a Golden Screwdriver?
+    assert:
+      - type: javascript
+        value: file://assertions.ts:topic
+        config:
+          topic: not_in_catalog
+
+  - description: '[known failure] off-topic question is answered'
+    vars:
+      question: What is the capital of France?
+    assert:
+      - type: not-javascript
+        value: file://assertions.ts:topic
+        config:
+          topic: off_topic

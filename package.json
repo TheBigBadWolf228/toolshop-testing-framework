@@ -14,7 +14,8 @@
     "test:smoke": "playwright test --grep @smoke --project=\"UI Chrome\" --project=\"API\"",
     "report:allure": "rm -rf allure-report && allure generate && allure open allure-report",
     "typecheck": "tsc --noEmit",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test:evals": "promptfoo eval -c evals/promptfooconfig.yaml"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +27,7 @@
     "allure": "^3.22.1",
     "allure-playwright": "^3.14.0",
     "prettier": "3.9.10",
+    "promptfoo": "0.125.1",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "zod": "^4.6.7"
