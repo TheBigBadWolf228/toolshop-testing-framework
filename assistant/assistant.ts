@@ -1,36 +1,24 @@
 import { PRODUCTS } from './products.js';
+import REPLY_SCHEMA from './reply.schema.json' with { type: 'json' };
 
 const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://localhost:11434';
 const MODEL = process.env.OLLAMA_MODEL ?? 'qwen2.5:1.5b';
 
+export type Topic = 'catalog' | 'not_in_catalog' | 'off_topic';
+
 export type AssistantReply = {
-  offTopic: boolean;
+  topic: Topic;
   products: { name: string; price: number }[];
   answer: string;
 };
 
-export const REPLY_SCHEMA = {
-  type: 'object',
-  properties: {
-    offTopic: { type: 'boolean' },
-    products: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: { name: { type: 'string' }, price: { type: 'number' } },
-        required: ['name', 'price'],
-      },
-    },
-    answer: { type: 'string' },
-  },
-  required: ['offTopic', 'products', 'answer'],
-} as const;
-
 const SYSTEM_PROMPT = `You are the Toolshop product assistant.
 Answer only from the product list below. Never invent products or prices.
-If the question is not about tools or this shop (geography, math, etc.), set "offTopic" to true and leave "products" empty.
-If the asked product is not in the list, say so and leave "products" empty.
-"products" holds every listed product your answer mentions, with its exact name and price.
+Set "topic":
+- "catalog": the question is about a product in the list.
+- "not_in_catalog": the question is about a tool or product that is not in the list. Say it is not in the list.
+- "off_topic": the question is not about tools or this shop (geography, math, etc.). Do not answer it.
+"products" holds every listed product your answer mentions, with its exact name and price. Empty unless "catalog".
 
 Product list:
 ${PRODUCTS.map((p) => `- ${p.name} | ${p.category} | $${p.price}`).join('\n')}`;

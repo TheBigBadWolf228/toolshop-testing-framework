@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "topic": {
+      "type": "string",
+      "enum": ["catalog", "not_in_catalog", "off_topic"]
+    },
+    "products": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "price": { "type": "number" }
+        },
+        "required": ["name", "price"],
+        "additionalProperties": false
+      }
+    },
+    "answer": { "type": "string" }
+  },
+  "required": ["topic", "products", "answer"],
+  "additionalProperties": false
+}
