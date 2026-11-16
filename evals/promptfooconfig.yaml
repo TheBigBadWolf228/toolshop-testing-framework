@@ -11,6 +11,14 @@ evaluateOptions:
   maxConcurrency: 1
 
 defaultTest:
+  options:
+    provider:
+      text:
+        id: ollama:chat:llama3.2:3b
+        config:
+          temperature: 0
+      embedding:
+        id: ollama:embeddings:nomic-embed-text
   assert:
     - type: is-json
       value: file://../assistant/reply.schema.json
