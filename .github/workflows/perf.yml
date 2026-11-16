@@ -3,8 +3,6 @@ on:
   schedule:
     - cron: '0 5 * * 0'
   workflow_dispatch:
-  push:
-    branches: [k6-performance-testing]
 permissions:
   contents: read
 concurrency:
