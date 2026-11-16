@@ -11,6 +11,10 @@ evaluateOptions:
   maxConcurrency: 1
 
 defaultTest:
+  options:
+    provider:
+      embedding:
+        id: ollama:embeddings:nomic-embed-text
   assert:
     - type: is-json
       value: file://../assistant/reply.schema.json

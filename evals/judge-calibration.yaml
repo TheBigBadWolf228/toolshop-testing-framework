@@ -1,0 +1,13 @@
+description: Judge calibration against human labels
+
+prompts:
+  - '{{reply}}'
+
+providers:
+  - echo
+
+evaluateOptions:
+  cache: false
+  maxConcurrency: 1
+
+tests: file://judge-calibration.ts
