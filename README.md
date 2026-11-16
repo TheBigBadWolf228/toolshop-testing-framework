@@ -39,6 +39,10 @@ When a test fails because an API call or the browser failed, the report has
 For UI tests, `browser-log.md` has page URL, failed browser API calls and console errors.
 UI tests also get a screenshot. The curl uses $TOKEN, so paste valid one first.
 
+`npm run test:perf` runs the k6 test locally. It needs [k6](https://grafana.com/docs/k6/latest/set-up/install-k6/)
+installed and the app running in Docker. It targets http://localhost:8091 unless `API_URL` is set,
+never the public site.
+
 ## Running against the app in Docker
 
 CI starts its copy of the app in Docker for every test job. The demo site
@@ -90,14 +94,20 @@ fails if a test only passed on retry. When a nightly or flake hunt fails it open
 GitHub issue (labels `main-failure` and `flaky-tests`). Later failures comment on it, and
 the next green run closes it. Both can also be started by hand from the Actions tab.
 
-The assistant evals don't run on pull requests or merges. They run by cron and by hand (LLM Evals → Run workflow, or `gh workflow run evals.yml`).
+The assistant evals don't run on pull requests or merges. They run by cron and by hand (LLM Evals > Run workflow, or `gh workflow run evals.yml`).
 The job installs Ollama, pulls the models and uploads the Promptfoo report. A failure
 opens an issue labeled `llm-evals`.
+
+The performance test is a small k6 load on `GET /products`: up to 5 users for 35 seconds.
+It fails if p95 response time is over 500 ms, more than 1% of requests fail or checks drop
+below 99%. Like the evals it runs only by cron and by hand (Performance > Run workflow, or
+`gh workflow run perf.yml`). The job starts the app in Docker, runs k6 and uploads the HTML
+and JSON report. A failure opens an issue labeled `perf`.
 
 ### AWS run
 
 The smoke tests can also run against the app on an AWS machine.
-Start it from the Actions tab (AWS E2E → Run workflow) or with
+Start it from the Actions tab (AWS E2E > Run workflow) or with
 `gh workflow run aws-e2e.yml --ref <branch>`. The CI user and its permissions
 are in `infra/ci-access.yml`.
 
