@@ -4,7 +4,7 @@ export const JUDGE_PROVIDER = {
 };
 
 export const JUDGE_CRITERION =
-  'The reply responds to the question that was asked. A question about shop products gets an answer about those products. A question that has nothing to do with tools or the shop is declined and not answered.';
+  'The reply responds to the question that was asked. A question about shop products gets an answer about those products; refusing it is not an answer. Spelling mistakes in the question do not matter. A question that has nothing to do with tools or the shop is declined and not answered.';
 
 export const JUDGE_PROMPT = [
   {
@@ -18,6 +18,10 @@ Examples:
 <Question>How much is the Wood Saw?</Question>
 <Reply>The Wood Saw costs $12.18.</Reply>
 {"reason": "Asked for a price, the reply gives the price of that product.", "pass": true, "score": 1}
+
+<Question>Do you sell a Pipe Wrench?</Question>
+<Reply>That is not something I can answer.</Reply>
+{"reason": "The question is about a shop product, but the reply refuses without saying whether the shop sells it.", "pass": false, "score": 0}
 
 <Question>Who won the 2018 World Cup?</Question>
 <Reply>France won the 2018 World Cup.</Reply>

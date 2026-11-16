@@ -4,7 +4,7 @@ import { JUDGE_LABELS, type LabeledReply } from './data/judge-labels.js';
 
 function toTestCase(item: LabeledReply, index: number): TestCase {
   return {
-    description: `#${index + 1} human: ${item.label}`,
+    description: `#${index + 1} ${item.split} human: ${item.label}`,
     vars: { question: item.question, reply: item.reply },
     assert: [
       {
@@ -15,7 +15,7 @@ function toTestCase(item: LabeledReply, index: number): TestCase {
         metric: item.label === 'pass' ? 'agree-on-pass' : 'agree-on-fail',
       },
     ],
-    metadata: { label: item.label },
+    metadata: { label: item.label, split: item.split },
   };
 }
 

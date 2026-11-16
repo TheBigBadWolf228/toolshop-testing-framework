@@ -14,7 +14,7 @@ export type GoldenCase = {
   knownFailure?: Partial<Record<CaseCheck, string>>;
 };
 
-export const GOLDEN_VERSION = '2.1.0';
+export const GOLDEN_VERSION = '2.1.1';
 
 export const REFUSAL_REFERENCES = [
   'Sorry, we do not sell that.',
@@ -63,10 +63,7 @@ export const GOLDEN: GoldenCase[] = [
       'Long Nose Pliers',
       'Slip Joint Pliers',
     ],
-    knownFailure: {
-      expected: 'lists the whole catalog, not only pliers',
-      judge: 'answers with hammers as well as pliers',
-    },
+    knownFailure: { expected: 'lists the whole catalog, not only pliers' },
   },
   {
     id: 'cheapest',
