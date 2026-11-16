@@ -23,6 +23,16 @@ jobs:
         with:
           version: 0.40.16
       - name: Pull models
+        run: for m in $MODELS; do ollama pull "$m"; done
+      - name: Run evals
+        run: npm run test:evals -- -o reports/evals.html -o reports/evals.json
+      - name: Summary
+        if: ${{ !cancelled() }}
         run: |
-          for m in $MODELS; do ollama pull "$m"; done
-          ollama list
+          jq -r '.results.stats | "Evals: \(.successes) passed, \(.failures) failed, \(.errors) errors"' reports/evals.json >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: evals-report
+          path: reports/
+          retention-days: 7
