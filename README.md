@@ -90,6 +90,10 @@ fails if a test only passed on retry. When a nightly or flake hunt fails it open
 GitHub issue (labels `main-failure` and `flaky-tests`). Later failures comment on it, and
 the next green run closes it. Both can also be started by hand from the Actions tab.
 
+The assistant evals don't run on pull requests or merges. They run by cron and by hand (LLM Evals → Run workflow, or `gh workflow run evals.yml`).
+The job installs Ollama, pulls the models and uploads the Promptfoo report. A failure
+opens an issue labeled `llm-evals`.
+
 ### AWS run
 
 The smoke tests can also run against the app on an AWS machine.
