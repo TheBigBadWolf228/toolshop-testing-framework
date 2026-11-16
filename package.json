@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "format:check": "prettier --check .",
     "test:evals": "promptfoo eval -c evals/promptfooconfig.yaml",
-    "test:evals:judge-calibration": "promptfoo eval -c evals/judge-calibration.yaml"
+    "test:evals:judge-calibration": "promptfoo eval -c evals/judge-calibration.yaml",
+    "test:perf": "k6 run perf/products.js"
   },
   "keywords": [],
   "author": "",
