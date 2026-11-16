@@ -3,7 +3,7 @@ import type { PRODUCTS } from '../../assistant/products.js';
 
 type ProductName = (typeof PRODUCTS)[number]['name'];
 
-export type CaseCheck = 'expected' | 'semantic';
+export type CaseCheck = 'expected' | 'semantic' | 'judge';
 
 export type GoldenCase = {
   id: string;
@@ -14,7 +14,7 @@ export type GoldenCase = {
   knownFailure?: Partial<Record<CaseCheck, string>>;
 };
 
-export const GOLDEN_VERSION = '2.0.0';
+export const GOLDEN_VERSION = '2.1.0';
 
 export const REFUSAL_REFERENCES = [
   'Sorry, we do not sell that.',
@@ -63,7 +63,10 @@ export const GOLDEN: GoldenCase[] = [
       'Long Nose Pliers',
       'Slip Joint Pliers',
     ],
-    knownFailure: { expected: 'lists the whole catalog, not only pliers' },
+    knownFailure: {
+      expected: 'lists the whole catalog, not only pliers',
+      judge: 'answers with hammers as well as pliers',
+    },
   },
   {
     id: 'cheapest',
@@ -94,6 +97,7 @@ export const GOLDEN: GoldenCase[] = [
     knownFailure: {
       expected: 'marks it not_in_catalog and lists the catalog',
       semantic: 'answers the question instead of declining',
+      judge: 'answers the question instead of declining',
     },
   },
   {
@@ -104,6 +108,7 @@ export const GOLDEN: GoldenCase[] = [
     knownFailure: {
       expected: 'marks it catalog and lists the catalog',
       semantic: 'answers the math instead of declining',
+      judge: 'answers the math instead of declining',
     },
   },
 ];

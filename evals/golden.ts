@@ -7,8 +7,10 @@ import {
   type CaseCheck,
   type GoldenCase,
 } from './data/golden.js';
+import { JUDGE_CRITERION, JUDGE_PROMPT } from './data/judge.js';
 
 const REFUSAL_THRESHOLD = 0.5;
+const ANSWER_ONLY = 'JSON.parse(output).answer';
 
 function check(c: GoldenCase, metric: CaseCheck, assertion: Assertion): Assertion {
   const known = c.knownFailure?.[metric] !== undefined;
@@ -36,10 +38,18 @@ function toTestCase(c: GoldenCase): TestCase {
         type: 'similar',
         value: REFUSAL_REFERENCES,
         threshold: REFUSAL_THRESHOLD,
-        transform: 'JSON.parse(output).answer',
+        transform: ANSWER_ONLY,
       })
     );
   }
+  assert.push(
+    check(c, 'judge', {
+      type: 'llm-rubric',
+      value: JUDGE_CRITERION,
+      rubricPrompt: JUDGE_PROMPT,
+      transform: ANSWER_ONLY,
+    })
+  );
   const reasons = Object.values(c.knownFailure ?? {});
   return {
     description: reasons.length
