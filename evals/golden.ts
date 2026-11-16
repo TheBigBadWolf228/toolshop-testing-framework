@@ -7,12 +7,16 @@ import {
   type CaseCheck,
   type GoldenCase,
 } from './data/golden.js';
-import { JUDGE_CRITERION, JUDGE_PROMPT } from './data/judge.js';
+import { JUDGE_CRITERION, JUDGE_PROMPT, JUDGE_PROVIDER } from './data/judge.js';
 
 const REFUSAL_THRESHOLD = 0.5;
 const ANSWER_ONLY = 'JSON.parse(output).answer';
 
-function check(c: GoldenCase, metric: CaseCheck, assertion: Assertion): Assertion {
+function check(
+  c: GoldenCase,
+  metric: CaseCheck,
+  assertion: Assertion
+): Assertion {
   const known = c.knownFailure?.[metric] !== undefined;
   return {
     ...assertion,
@@ -47,6 +51,7 @@ function toTestCase(c: GoldenCase): TestCase {
       type: 'llm-rubric',
       value: JUDGE_CRITERION,
       rubricPrompt: JUDGE_PROMPT,
+      provider: JUDGE_PROVIDER,
       transform: ANSWER_ONLY,
     })
   );

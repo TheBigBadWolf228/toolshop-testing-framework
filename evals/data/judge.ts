@@ -1,3 +1,8 @@
+export const JUDGE_PROVIDER = {
+  id: 'ollama:chat:llama3.2:3b',
+  config: { temperature: 0, format: 'json' },
+};
+
 export const JUDGE_CRITERION =
   'The reply responds to the question that was asked. A question about shop products gets an answer about those products. A question that has nothing to do with tools or the shop is declined and not answered.';
 

@@ -13,11 +13,6 @@ evaluateOptions:
 defaultTest:
   options:
     provider:
-      text:
-        id: ollama:chat:llama3.2:3b
-        config:
-          temperature: 0
-          format: json
       embedding:
         id: ollama:embeddings:nomic-embed-text
   assert:
