@@ -1,7 +1,7 @@
 name: LLM Evals
 on:
   push:
-    branches: [evals-ci]
+    branches: [ai-evals-in-ci]
   schedule:
     - cron: '0 4 * * 0'
   workflow_dispatch:
