@@ -22,7 +22,7 @@ test.describe('as a new customer', () => {
     await invoicesPage.open();
 
     await expect(invoicesPage.heading).toBeVisible();
-    await expect(invoicesPage.columnHeaders).toHaveText([...INVOICE_COLUMNS]);
+    await expect(invoicesPage.columnHeaders).toHaveText(INVOICE_COLUMNS);
     await expect(invoicesPage.rows).toHaveCount(0);
   });
 });

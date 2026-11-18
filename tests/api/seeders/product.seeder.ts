@@ -1,13 +1,14 @@
-import { faker } from '@faker-js/faker';
 import type { Api } from '../clients/api.js';
 import { SEEDED_PRODUCT_STOCK } from '../data/products.js';
 import { buildBrand } from '../factories/brand.factory.js';
 import { buildCategory } from '../factories/category.factory.js';
+import { pickImage } from '../factories/image.factory.js';
 import { buildProduct } from '../factories/product.factory.js';
 import type {
   CreatedProduct,
   Product,
   ProductRequest,
+  ProductSearchItem,
 } from '../schemas/product.schema.js';
 
 export async function seedProduct(
@@ -20,12 +21,23 @@ export async function seedProduct(
       overrides.category_id ??
       (await api.categories.create(buildCategory())).id,
     product_image_id:
-      overrides.product_image_id ??
-      faker.helpers.arrayElement(await api.images.list()).id,
+      overrides.product_image_id ?? pickImage(await api.images.list()).id,
   };
   return api.products.create(
     buildProduct(refs, { stock: SEEDED_PRODUCT_STOCK, ...overrides })
   );
+}
+
+export async function findProduct(
+  api: Api,
+  name: string
+): Promise<ProductSearchItem> {
+  const { data } = await api.products.search(name);
+  const match = data.find((product) => product.name === name);
+  if (!match) {
+    throw new Error(`Product "${name}" not found by search.`);
+  }
+  return match;
 }
 
 export async function restockProduct(
@@ -33,11 +45,7 @@ export async function restockProduct(
   name: string,
   stock: number
 ): Promise<Product> {
-  const { data } = await api.products.search(name);
-  const match = data.find((product) => product.name === name);
-  if (!match) {
-    throw new Error(`Product "${name}" not found by search.`);
-  }
+  const match = await findProduct(api, name);
   await api.products.setStock(match.id, stock);
   const product = await api.products.get(match.id);
   // Others keep buying it, so expecting most of the stock, not exact number.

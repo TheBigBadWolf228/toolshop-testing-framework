@@ -1,9 +1,9 @@
-import { faker } from '@faker-js/faker';
 import type { APIResponse } from '@playwright/test';
 import { test, expect } from './support/fixtures.js';
 import type { Api } from './clients/api.js';
 import { buildBrand } from './factories/brand.factory.js';
 import { buildCategory } from './factories/category.factory.js';
+import { pickImage } from './factories/image.factory.js';
 import { buildProduct, type ProductRefs } from './factories/product.factory.js';
 import type { Brand } from './schemas/brand.schema.js';
 import type { CreatedCategory } from './schemas/category.schema.js';
@@ -48,7 +48,7 @@ async function createDeps(api: Api): Promise<ProductDeps> {
   return {
     brand: await api.brands.create(buildBrand()),
     category: await api.categories.create(buildCategory()),
-    image: faker.helpers.arrayElement(await api.images.list()),
+    image: pickImage(await api.images.list()),
   };
 }
 

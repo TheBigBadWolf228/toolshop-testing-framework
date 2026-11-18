@@ -9,7 +9,7 @@ test('should show only products within the price range', async ({
   homePage,
 }) => {
   await homePage.open();
-  await expect(homePage.grid.names.first()).toBeVisible();
+  await homePage.grid.waitForProducts();
 
   await homePage.filters.setPriceRange(PRICE_RANGE.min, PRICE_RANGE.max);
 

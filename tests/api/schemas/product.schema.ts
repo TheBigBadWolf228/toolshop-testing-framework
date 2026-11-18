@@ -85,3 +85,4 @@ export type CreatedProduct = z.infer<typeof CreatedProductSchema>;
 export type ProductListItem = z.infer<typeof ProductListItemSchema>;
 export type ProductPage = z.infer<typeof ProductPageSchema>;
 export type ProductSearchPage = z.infer<typeof ProductSearchPageSchema>;
+export type ProductSearchItem = z.infer<typeof ProductSearchItemSchema>;

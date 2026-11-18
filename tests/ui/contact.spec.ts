@@ -12,7 +12,7 @@ test.describe('as anonymous', () => {
   }) => {
     await contactPage.send();
 
-    await expect(contactPage.errors).toHaveText([...CONTACT_ERRORS.required]);
+    await expect(contactPage.errors).toHaveText(CONTACT_ERRORS.required);
   });
 
   test('should reject an invalid email and a too-short message', async ({
