@@ -24,7 +24,7 @@ export class RegisterPage {
     this.dob = page.getByRole('textbox', { name: 'Date of Birth' });
     this.phone = page.getByRole('textbox', { name: 'Phone' });
     this.email = page.getByRole('textbox', { name: 'Email address' });
-    this.password = page.getByLabel('Password', { exact: true });
+    this.password = page.getByRole('textbox', { name: 'Password' });
     this.submitButton = page.getByRole('button', { name: 'Register' });
   }
 

@@ -14,6 +14,11 @@ export class ProductGrid {
       .locator('.co2-letter.active');
   }
 
+  @step('Wait for products')
+  async waitForProducts(): Promise<void> {
+    await this.names.first().waitFor();
+  }
+
   @step('Open product {0} from grid')
   async openProduct(name: string): Promise<void> {
     await this.names.and(this.page.getByText(name, { exact: true })).click();
@@ -31,6 +36,7 @@ export class ProductGrid {
     );
   }
 
+  @step('Read CO2 ratings')
   readCo2Ratings(): Promise<string[]> {
     return this.readTexts(this.co2Ratings);
   }
