@@ -1,5 +1,5 @@
 // Local Jenkins version of .github/workflows/playwright.yml. Setup: jenkins/
-def PLAYWRIGHT_IMAGE = 'mcr.microsoft.com/playwright:v1.64.1-noble'
+def PLAYWRIGHT_IMAGE = 'mcr.microsoft.com/playwright:v1.65.0-noble'
 
 void withTestUsers(Closure body) {
   withCredentials([
