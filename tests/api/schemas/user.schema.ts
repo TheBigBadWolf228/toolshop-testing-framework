@@ -35,6 +35,10 @@ export const RegisteredUserSchema = z.object({
   created_at: z.string(),
 });
 
+export const CurrentUserSchema = RegisteredUserSchema.extend({
+  role: z.string().optional(),
+});
+
 export interface NewUser {
   first_name: string;
   last_name: string;
