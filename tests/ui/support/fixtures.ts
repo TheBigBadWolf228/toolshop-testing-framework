@@ -150,7 +150,7 @@ export const test = mergeTests(apiTest, uiTest).extend<
       const carts = new Cleanup(adminRequest);
       const pending = trackCarts(page, carts);
       await use();
-      await Promise.all(pending);
+      await Promise.allSettled(pending);
       await carts.run();
     },
     { auto: true },

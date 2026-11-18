@@ -3,6 +3,7 @@ import REPLY_SCHEMA from './reply.schema.json' with { type: 'json' };
 
 const OLLAMA_URL = process.env.OLLAMA_URL ?? 'http://localhost:11434';
 const MODEL = process.env.OLLAMA_MODEL ?? 'qwen2.5:1.5b';
+const TIMEOUT_MS = 60_000;
 
 export type Topic = 'catalog' | 'not_in_catalog' | 'off_topic';
 
@@ -26,6 +27,7 @@ ${PRODUCTS.map((p) => `- ${p.name} | ${p.category} | $${p.price}`).join('\n')}`;
 export async function askAssistant(question: string): Promise<AssistantReply> {
   const response = await fetch(`${OLLAMA_URL}/api/chat`, {
     method: 'POST',
+    signal: AbortSignal.timeout(TIMEOUT_MS),
     body: JSON.stringify({
       model: MODEL,
       messages: [
@@ -40,6 +42,12 @@ export async function askAssistant(question: string): Promise<AssistantReply> {
   if (!response.ok) {
     throw new Error(`Ollama ${response.status}: ${await response.text()}`);
   }
-  const body = (await response.json()) as { message: { content: string } };
-  return JSON.parse(body.message.content) as AssistantReply;
+  const { message } = (await response.json()) as {
+    message: { content: string };
+  };
+  try {
+    return JSON.parse(message.content) as AssistantReply;
+  } catch {
+    throw new Error(`Assistant reply is not JSON: ${message.content}`);
+  }
 }

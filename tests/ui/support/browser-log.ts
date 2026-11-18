@@ -73,7 +73,7 @@ export class BrowserLog {
 
   private async recordCall(response: Response): Promise<void> {
     const request = response.request();
-    const headers = await request.allHeaders();
+    const headers = await request.allHeaders().catch(() => ({}));
     this.calls.record({
       method: request.method(),
       url: response.url(),
