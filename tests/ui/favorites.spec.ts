@@ -1,15 +1,11 @@
 import { test, expect } from './support/fixtures.js';
+import { findProduct } from '../api/seeders/product.seeder.js';
 import { FAVORITE_PRODUCT } from './data/shop.js';
 
 let productId: string;
 
 test.beforeEach(async ({ api, freshCustomer: _ }) => {
-  const { data } = await api.products.search(FAVORITE_PRODUCT);
-  const product = data.find(({ name }) => name === FAVORITE_PRODUCT);
-  if (!product) {
-    throw new Error(`Product "${FAVORITE_PRODUCT}" not found by search.`);
-  }
-  productId = product.id;
+  productId = (await findProduct(api, FAVORITE_PRODUCT)).id;
 });
 
 test('should add a product to favorites from the product page', async ({
