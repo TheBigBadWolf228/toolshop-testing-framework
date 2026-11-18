@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.64.1-noble
+FROM mcr.microsoft.com/playwright:v1.65.0-noble
 WORKDIR /app
 ENV PLAYWRIGHT_HTML_OPEN=never
 COPY package.json package-lock.json .npmrc ./
